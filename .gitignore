@@ -1,0 +1,26 @@
+# Arquivos de ambiente — mantenha credenciais reais fora do controle de versão.
+.env
+.env.local
+.env.*.local
+frontend/.env
+backend/.env
+
+# Dependências e artefatos de build
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+dist/
+frontend/dist/
+backend/dist/
+coverage/
+backend/coverage/
+
+# Ferramentas e arquivos do sistema operacional
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Artefatos locais do Prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
