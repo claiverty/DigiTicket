@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getApiHealth } from '../services/health-service';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/use-auth';
 
 export function HomePage() {
+  const { user } = useAuth();
   const healthQuery = useQuery({ queryKey: ['api-health'], queryFn: getApiHealth });
 
   return (
@@ -14,9 +17,24 @@ export function HomePage() {
           A estrutura para vender experiências sem atrito.
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-          A fundação está pronta: React, NestJS, Prisma e PostgreSQL/Supabase serão
-          organizados aqui para o fluxo completo de eventos e ingressos.
+          A fundação e a autenticação estão prontas para receber o catálogo, as reservas e os ingressos.
         </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            to={user ? '/perfil' : '/entrar'}
+            className="rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-300"
+          >
+            {user ? 'Acessar meu perfil' : 'Entrar na plataforma'}
+          </Link>
+          {!user && (
+            <Link
+              to="/cadastro"
+              className="rounded-xl border border-white/10 px-5 py-3 font-semibold text-white hover:border-white/20"
+            >
+              Criar conta
+            </Link>
+          )}
+        </div>
       </div>
 
       <aside className="self-center rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20">

@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 1 — fundação do projeto.
+> Status atual: Fase 2 — autenticação implementada e conectada ao Supabase.
 
 ## Sobre
 
@@ -29,6 +29,8 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Tailwind CSS configurado.
 - Backend com NestJS e TypeScript estrito.
 - Prisma configurado para PostgreSQL/Supabase.
+- Projeto Supabase provisionado em São Paulo (`sa-east-1`).
+- Data API desativada e RLS automático habilitado para novas tabelas públicas.
 - Swagger/OpenAPI disponível em `/api/docs`.
 - Health check disponível em `/api/health`.
 - Validação global das requisições no NestJS.
@@ -36,6 +38,34 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Arquivos `.env.example` documentados.
 - Arquivos `.env` locais protegidos pelo `.gitignore`.
 - Testes iniciais do health check.
+- Modelo `User` e enum de papéis `ORGANIZER`, `CUSTOMER` e `GATE`.
+- Migration versionada para usuários e papéis.
+- Seed idempotente com quatro usuários de demonstração.
+- Cadastro público restrito ao papel `CUSTOMER`.
+- Login com bcrypt e emissão de JWT.
+- Guards globais de autenticação e autorização baseada em papéis.
+- Endpoints `POST /auth/register`, `POST /auth/login` e `GET /auth/me`.
+- Limite específico de tentativas nos endpoints de cadastro e login.
+- Telas de cadastro e login no frontend.
+- Sessão persistida no navegador, logout e rota de perfil protegida.
+- Testes unitários e e2e para cadastro, login, JWT e acesso por papel.
+
+## Autenticação
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/register` | Público | Cria exclusivamente uma conta `CUSTOMER`. |
+| `POST` | `/api/auth/login` | Público | Valida as credenciais e emite um JWT. |
+| `GET` | `/api/auth/me` | Bearer JWT | Retorna o usuário autenticado. |
+
+Estas contas estão disponíveis no ambiente configurado:
+
+| Papel | E-mail | Senha |
+| --- | --- | --- |
+| Organizador | `organizador@demo.com` | `Demo123!` |
+| Cliente | `cliente1@demo.com` | `Demo123!` |
+| Cliente | `cliente2@demo.com` | `Demo123!` |
+| Portaria | `portaria@demo.com` | `Demo123!` |
 
 ## Arquitetura atual
 
@@ -115,6 +145,8 @@ cd backend
 npm install
 Copy-Item .env.example .env
 npm run prisma:generate
+npm run prisma:migrate:deploy
+npm run seed
 npm run start:dev
 ```
 
@@ -143,6 +175,30 @@ TICKETMASTER_API_KEY=
 
 Credenciais reais devem existir somente nos arquivos `.env`, que não são versionados.
 
+## Configuração do Supabase
+
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. A migration de autenticação e o seed já foram aplicados.
+
+Para configurar outro ambiente:
+
+1. Crie ou abra um projeto no painel do Supabase e habilite RLS automático para novas tabelas públicas.
+2. Use o botão **Connect** do projeto para consultar as connection strings.
+3. Configure `DATABASE_URL` com a conexão usada pela API:
+   - backend persistente com rede IPv6: conexão direta;
+   - backend persistente em rede somente IPv4: **Session pooler**, porta `5432`;
+   - backend serverless: **Transaction pooler**, porta `6543`.
+4. Configure `DIRECT_URL` com a conexão direta, porta `5432`, para migrations. Caso sua rede não ofereça IPv6, utilize o Session pooler como alternativa.
+5. Codifique caracteres especiais da senha na URL, por exemplo `@` como `%40`.
+6. Aplique a migration versionada e execute o seed:
+
+```powershell
+cd backend
+npm run prisma:migrate:deploy
+npm run seed
+```
+
+O frontend continuará sem acessar o Supabase diretamente. Toda comunicação permanece no fluxo `Frontend → NestJS → Prisma → PostgreSQL`.
+
 ## Verificação
 
 Frontend:
@@ -168,20 +224,16 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Autenticação JWT, usuários, papéis e rotas protegidas.
-2. Criação, edição, publicação e catálogo de eventos.
-3. Tipos de ingresso, estoque e reservas temporárias.
-4. Checkout e pagamento simulado.
-5. Emissão de ingressos com QR Code assinado e compartilhamento.
-6. Validação de ingressos na portaria e registro de tentativas.
-7. Integração para pesquisa e importação de eventos externos.
-8. Mapa simples de assentos reservados.
-9. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Criação, edição, publicação e catálogo de eventos.
+2. Tipos de ingresso, estoque e reservas temporárias.
+3. Checkout e pagamento simulado.
+4. Emissão de ingressos com QR Code assinado e compartilhamento.
+5. Validação de ingressos na portaria e registro de tentativas.
+6. Integração para pesquisa e importação de eventos externos.
+7. Mapa simples de assentos reservados.
+8. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
-- Ainda não existem usuários nem autenticação.
 - Eventos, reservas, pagamentos e ingressos ainda não estão implementados.
-- Ainda não existem migrations ou seed de demonstração.
-- A conexão real com Supabase depende das credenciais configuradas localmente.
-# DigiTicket
+- O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.

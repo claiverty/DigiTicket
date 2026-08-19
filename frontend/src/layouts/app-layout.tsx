@@ -1,16 +1,44 @@
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
+import { useAuth } from '../hooks/use-auth';
 
 export function AppLayout() {
+  const { user, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-white/10 bg-slate-950/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <a className="text-lg font-semibold tracking-tight" href="/">
+          <Link className="text-lg font-semibold tracking-tight" to="/">
             digi<span className="text-emerald-400">ticket</span>
-          </a>
-          <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-            Fase 1 · Fundação
-          </span>
+          </Link>
+          <nav className="flex items-center gap-3" aria-label="Navegação principal">
+            {user ? (
+              <>
+                <Link className="text-sm text-slate-300 hover:text-white" to="/perfil">
+                  {user.name.split(' ')[0]}
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:border-white/20 hover:text-white"
+                >
+                  Sair
+                </button>
+              </>
+            ) : (
+              <>
+                <Link className="text-sm text-slate-300 hover:text-white" to="/entrar">
+                  Entrar
+                </Link>
+                <Link
+                  className="rounded-lg bg-emerald-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+                  to="/cadastro"
+                >
+                  Criar conta
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       </header>
       <main>

@@ -1,24 +1,28 @@
-import type { ConfigFactory } from '@nestjs/config';
-
 type Environment = Record<string, unknown>;
 
 function parsePort(value: unknown): number {
   const port = Number(value ?? 3000);
 
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error('PORT must be a valid TCP port.');
+    throw new Error('PORT deve ser uma porta TCP válida.');
   }
 
   return port;
 }
 
-export const validateEnvironment: ConfigFactory = (): Environment => ({
-  PORT: parsePort(process.env.PORT),
-  FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
-  DATABASE_URL: process.env.DATABASE_URL,
-  DIRECT_URL: process.env.DIRECT_URL,
-  JWT_SECRET: process.env.JWT_SECRET,
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? '7d',
-  TICKET_SIGNING_SECRET: process.env.TICKET_SIGNING_SECRET,
-  TICKETMASTER_API_KEY: process.env.TICKETMASTER_API_KEY,
-});
+export function validateEnvironment(config: Environment): Environment {
+  const jwtSecret =
+    typeof config.JWT_SECRET === 'string' ? config.JWT_SECRET : '';
+
+  if (jwtSecret.length < 32) {
+    throw new Error('JWT_SECRET deve possuir pelo menos 32 caracteres.');
+  }
+
+  return {
+    ...config,
+    PORT: parsePort(config.PORT),
+    FRONTEND_URL: config.FRONTEND_URL ?? 'http://localhost:5173',
+    JWT_SECRET: jwtSecret,
+    JWT_EXPIRES_IN: config.JWT_EXPIRES_IN ?? '7d',
+  };
+}
