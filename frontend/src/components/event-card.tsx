@@ -3,6 +3,7 @@ import type { Event } from '../types/event';
 import {
   eventCategoryLabels,
   formatEventDate,
+  formatMoney,
 } from '../utils/event-formatters';
 
 interface EventCardProps {
@@ -10,6 +11,8 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  const startingPrice = event.ticketTypes?.[0]?.priceCents;
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition hover:-translate-y-1 hover:border-emerald-300/30">
       <Link to={`/eventos/${event.slug}`}>
@@ -35,6 +38,11 @@ export function EventCard({ event }: EventCardProps) {
           <p className="mt-1 text-sm text-slate-400">
             {event.venueName} · {event.city}/{event.state}
           </p>
+          {startingPrice !== undefined && (
+            <p className="mt-4 text-sm text-slate-400">
+              A partir de <strong className="text-base text-white">{formatMoney(startingPrice)}</strong>
+            </p>
+          )}
           <p className="mt-5 text-sm font-semibold text-emerald-300">
             Ver detalhes →
           </p>

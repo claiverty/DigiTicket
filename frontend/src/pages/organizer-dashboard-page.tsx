@@ -118,6 +118,11 @@ export function OrganizerDashboardPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  {event.saleMode === 'GENERAL_ADMISSION' && event.status !== 'CANCELLED' && (
+                    <Link className="rounded-lg border border-emerald-300/20 px-3 py-2 text-sm text-emerald-200 hover:border-emerald-300/40" to={`/organizador/eventos/${event.id}/ingressos`}>
+                      Gerenciar ingressos
+                    </Link>
+                  )}
                   {event.status !== 'CANCELLED' && (
                     <Link className="rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-200 hover:border-white/25" to={`/organizador/eventos/${event.id}/editar`}>
                       Editar

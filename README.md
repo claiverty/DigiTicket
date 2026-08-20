@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 3 — gestão de eventos e catálogo público implementados.
+> Status atual: Fase 4 — venda por quantidade, estoque e reservas temporárias implementados.
 
 ## Sobre
 
@@ -57,6 +57,16 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Página pública de detalhes do evento.
 - Dashboard inicial do organizador com métricas e gestão de eventos.
 - Seed com um evento publicado e um rascunho de demonstração.
+- Tipos de ingresso por quantidade com preço inteiro em centavos.
+- Gestão de capacidade e disponibilidade pelo organizador.
+- Preço inicial exibido no catálogo público.
+- Seleção de quantidades na página do evento.
+- Reservas de ingressos com duração de 10 minutos.
+- Cálculo do total exclusivamente no backend.
+- Bloqueio atômico de estoque para impedir reservas acima da disponibilidade.
+- Expiração lazy e cancelamento com devolução transacional ao estoque.
+- Página protegida `Minhas reservas` com contagem regressiva.
+- Constraints no PostgreSQL para impedir valores e estoques inválidos.
 
 ## Autenticação
 
@@ -91,6 +101,48 @@ Somente eventos com status `PUBLISHED` aparecem no catálogo. Eventos novos semp
 | `DELETE` | `/api/organizer/events/:id` | Organizador proprietário | Exclui somente um rascunho. |
 
 O seed inclui `Festival Luzes da Cidade`, publicado no catálogo, e `Mostra de Cinema Brasileiro`, mantido como rascunho no dashboard do organizador.
+
+O festival possui os tipos de ingresso `Pista` e `Pista Premium`. Um evento de entrada geral precisa ter pelo menos um tipo de ingresso antes de ser publicado. Eventos com assentos reservados serão liberados somente quando o mapa de assentos estiver implementado.
+
+## Estoque e reservas
+
+Preços são armazenados como inteiros em `priceCents`: `R$ 70,00`, por exemplo, é persistido como `7000`. A capacidade representa o estoque total e `availableQuantity` representa o que ainda pode ser reservado.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/organizer/events/:eventId/ticket-types` | Organizador proprietário | Lista os tipos de ingresso do evento. |
+| `POST` | `/api/organizer/events/:eventId/ticket-types` | Organizador proprietário | Cria um tipo e seu estoque inicial. |
+| `PATCH` | `/api/organizer/events/:eventId/ticket-types/:id` | Organizador proprietário | Altera dados e capacidade sem invalidar reservas. |
+| `DELETE` | `/api/organizer/events/:eventId/ticket-types/:id` | Organizador proprietário | Exclui um tipo sem histórico de reservas. |
+| `POST` | `/api/reservations/events/:eventId` | Cliente | Reserva quantidades disponíveis por 10 minutos. |
+| `GET` | `/api/reservations` | Cliente | Lista somente as próprias reservas. |
+| `GET` | `/api/reservations/:id` | Cliente proprietário | Exibe uma reserva própria. |
+| `POST` | `/api/reservations/:id/cancel` | Cliente proprietário | Cancela uma reserva pendente e libera o estoque. |
+
+O estoque é reduzido dentro de uma transação com uma atualização condicional equivalente a:
+
+```sql
+UPDATE ticket_types
+SET available_quantity = available_quantity - :quantity
+WHERE id = :id
+  AND available_quantity >= :quantity;
+```
+
+A reserva só é criada se todas as atualizações forem bem-sucedidas. Em caso de falha, a transação inteira é revertida. Itens são processados em uma ordem consistente para reduzir risco de deadlock. Constraints adicionais garantem no banco que a disponibilidade nunca seja negativa nem maior que a capacidade.
+
+Reservas vencidas são processadas de forma lazy ao consultar catálogo e reservas ou ao iniciar uma nova reserva. A mudança de estado é condicional, portanto somente um processo consegue liberar cada reserva. Essa estratégia mantém o fluxo correto sem depender exclusivamente de um job em memória.
+
+### Como testar a fase atual
+
+1. Entre como organizador e abra `Gerenciar ingressos` no evento de entrada geral.
+2. Crie ou edite um tipo de ingresso e confira preço, capacidade e disponibilidade.
+3. Saia e entre como `cliente1@demo.com`.
+4. Abra o `Festival Luzes da Cidade`, escolha quantidades e reserve.
+5. Abra `Minhas reservas` e confira itens, total calculado e contagem regressiva.
+6. Cancele a reserva e confirme que a quantidade retorna ao catálogo.
+7. Para testar a expiração, deixe uma reserva vencer e atualize o catálogo ou a página de reservas após 10 minutos.
+
+O checkout ainda não aparece porque será implementado na próxima fase.
 
 ## Arquitetura atual
 
@@ -249,16 +301,17 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Tipos de ingresso, estoque e reservas temporárias.
-2. Checkout e pagamento simulado.
-3. Emissão de ingressos com QR Code assinado e compartilhamento.
-4. Validação de ingressos na portaria e registro de tentativas.
-5. Integração para pesquisa e importação de eventos externos.
-6. Mapa simples de assentos reservados.
-7. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Checkout e pagamento simulado.
+2. Emissão de ingressos com QR Code assinado e compartilhamento.
+3. Validação de ingressos na portaria e registro de tentativas.
+4. Integração para pesquisa e importação de eventos externos.
+5. Mapa simples de assentos reservados.
+6. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
-- Tipos de ingresso, reservas, pagamentos e ingressos ainda não estão implementados.
-- O catálogo ainda não exibe preços porque os tipos de ingresso pertencem à próxima fase.
+- Pagamentos e emissão dos ingressos definitivos ainda não estão implementados.
+- Reservas temporárias não persistem dados de cartão nem realizam cobrança.
+- Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
+- A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.

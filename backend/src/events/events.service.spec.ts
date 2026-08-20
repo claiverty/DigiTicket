@@ -38,11 +38,17 @@ describe('EventsService', () => {
     delete: jest.fn(),
   };
   const prismaMock = { event: eventMock };
+  const reservationsServiceMock = {
+    expirePendingReservations: jest.fn().mockResolvedValue(0),
+  };
   let service: EventsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new EventsService(prismaMock as unknown as PrismaService);
+    service = new EventsService(
+      prismaMock as unknown as PrismaService,
+      reservationsServiceMock as never,
+    );
   });
 
   it('mantém o catálogo restrito a eventos publicados', async () => {
@@ -63,7 +69,10 @@ describe('EventsService', () => {
         startDate: undefined,
       },
       orderBy: { startDate: 'asc' },
-      include: { organizer: { select: { name: true } } },
+      include: {
+        organizer: { select: { name: true } },
+        ticketTypes: { orderBy: { priceCents: 'asc' } },
+      },
     });
   });
 

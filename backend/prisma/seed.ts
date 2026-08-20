@@ -66,7 +66,7 @@ async function main() {
   const draftEndDate = new Date(draftStartDate);
   draftEndDate.setUTCHours(23, 0, 0, 0);
 
-  await prisma.event.upsert({
+  const publishedEvent = await prisma.event.upsert({
     where: { slug: 'festival-luzes-da-cidade' },
     update: {
       organizerId: organizer.id,
@@ -93,6 +93,38 @@ async function main() {
       status: EventStatus.PUBLISHED,
     },
   });
+
+  const demoTicketTypes = [
+    {
+      name: 'Pista',
+      description: 'Acesso à área geral do festival.',
+      priceCents: 7000,
+      capacity: 300,
+    },
+    {
+      name: 'Pista Premium',
+      description: 'Área próxima ao palco com acesso exclusivo.',
+      priceCents: 14000,
+      capacity: 100,
+    },
+  ];
+
+  for (const ticketType of demoTicketTypes) {
+    await prisma.ticketType.upsert({
+      where: {
+        eventId_name: { eventId: publishedEvent.id, name: ticketType.name },
+      },
+      update: {
+        description: ticketType.description,
+        priceCents: ticketType.priceCents,
+      },
+      create: {
+        eventId: publishedEvent.id,
+        ...ticketType,
+        availableQuantity: ticketType.capacity,
+      },
+    });
+  }
 
   await prisma.event.upsert({
     where: { slug: 'mostra-cinema-brasileiro' },

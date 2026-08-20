@@ -6,6 +6,7 @@ import {
   eventSaleModeLabels,
   formatEventDate,
 } from '../utils/event-formatters';
+import { TicketSelection } from '../components/ticket-selection';
 
 export function EventDetailsPage() {
   const { slug = '' } = useParams();
@@ -75,9 +76,7 @@ export function EventDetailsPage() {
               <dd className="mt-1 text-slate-200">{eventSaleModeLabels[event.saleMode]}</dd>
             </div>
           </dl>
-          <div className="mt-6 rounded-xl bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">
-            A seleção e os preços dos ingressos serão disponibilizados na próxima etapa.
-          </div>
+          <TicketSelection event={event} />
         </aside>
       </div>
     </article>

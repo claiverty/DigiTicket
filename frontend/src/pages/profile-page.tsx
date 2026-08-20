@@ -45,6 +45,14 @@ export function ProfilePage() {
           Gerenciar eventos
         </Link>
       )}
+      {user.role === 'CUSTOMER' && (
+        <Link
+          to="/minhas-reservas"
+          className="mt-8 inline-block rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-300"
+        >
+          Ver minhas reservas
+        </Link>
+      )}
     </section>
   );
 }

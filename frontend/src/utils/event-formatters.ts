@@ -29,6 +29,13 @@ export function formatEventDate(value: string): string {
   }).format(new Date(value));
 }
 
+export function formatMoney(priceCents: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(priceCents / 100);
+}
+
 export function toDateTimeLocal(value: string): string {
   const date = new Date(value);
   const offset = date.getTimezoneOffset() * 60_000;

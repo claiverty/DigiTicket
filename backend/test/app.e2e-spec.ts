@@ -73,6 +73,9 @@ describe('Aplicação (e2e)', () => {
       event: {
         findMany: jest.fn().mockResolvedValue([]),
       },
+      reservation: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({

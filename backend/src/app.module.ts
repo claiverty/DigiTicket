@@ -11,6 +11,8 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { EventsModule } from './events/events.module';
+import { ReservationsModule } from './reservations/reservations.module';
+import { TicketTypesModule } from './ticket-types/ticket-types.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { EventsModule } from './events/events.module';
     PrismaModule,
     AuthModule,
     EventsModule,
+    TicketTypesModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [

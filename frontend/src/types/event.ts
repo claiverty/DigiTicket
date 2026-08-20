@@ -23,6 +23,26 @@ export interface Event {
   createdAt: string;
   updatedAt: string;
   organizer?: { name: string };
+  ticketTypes?: TicketType[];
+}
+
+export interface TicketType {
+  id: string;
+  eventId: string;
+  name: string;
+  description: string | null;
+  priceCents: number;
+  capacity: number;
+  availableQuantity: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TicketTypeInput {
+  name: string;
+  description?: string;
+  priceCents: number;
+  capacity: number;
 }
 
 export interface EventInput {

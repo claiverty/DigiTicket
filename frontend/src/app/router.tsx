@@ -9,6 +9,8 @@ import { RoleRoute } from '../components/role-route';
 import { EventDetailsPage } from '../pages/event-details-page';
 import { OrganizerDashboardPage } from '../pages/organizer-dashboard-page';
 import { EventFormPage } from '../pages/event-form-page';
+import { TicketTypesPage } from '../pages/ticket-types-page';
+import { MyReservationsPage } from '../pages/my-reservations-page';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +25,12 @@ export const router = createBrowserRouter([
         children: [
           { path: 'perfil', element: <ProfilePage /> },
           {
+            element: <RoleRoute allowedRoles={['CUSTOMER']} />,
+            children: [
+              { path: 'minhas-reservas', element: <MyReservationsPage /> },
+            ],
+          },
+          {
             element: <RoleRoute allowedRoles={['ORGANIZER']} />,
             children: [
               { path: 'organizador', element: <OrganizerDashboardPage /> },
@@ -30,6 +38,10 @@ export const router = createBrowserRouter([
               {
                 path: 'organizador/eventos/:id/editar',
                 element: <EventFormPage />,
+              },
+              {
+                path: 'organizador/eventos/:id/ingressos',
+                element: <TicketTypesPage />,
               },
             ],
           },

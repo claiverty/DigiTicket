@@ -22,6 +22,11 @@ export function AppLayout() {
                     Organizador
                   </Link>
                 )}
+                {user.role === 'CUSTOMER' && (
+                  <Link className="text-sm text-slate-300 hover:text-white" to="/minhas-reservas">
+                    Minhas reservas
+                  </Link>
+                )}
                 <Link className="text-sm text-slate-300 hover:text-white" to="/perfil">
                   {user.name.split(' ')[0]}
                 </Link>

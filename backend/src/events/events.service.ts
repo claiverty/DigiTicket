@@ -3,17 +3,22 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EventStatus, Prisma } from '@prisma/client';
+import { EventSaleMode, EventStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReservationsService } from '../reservations/reservations.service';
 import type { CreateEventDto } from './dto/create-event.dto';
 import type { ListEventsQueryDto } from './dto/list-events-query.dto';
 import type { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly reservationsService: ReservationsService,
+  ) {}
 
-  listPublished(query: ListEventsQueryDto) {
+  async listPublished(query: ListEventsQueryDto) {
+    await this.reservationsService.expirePendingReservations();
     const where: Prisma.EventWhereInput = {
       status: EventStatus.PUBLISHED,
       title: query.search?.trim()
@@ -29,14 +34,21 @@ export class EventsService {
     return this.prisma.event.findMany({
       where,
       orderBy: { startDate: 'asc' },
-      include: { organizer: { select: { name: true } } },
+      include: {
+        organizer: { select: { name: true } },
+        ticketTypes: { orderBy: { priceCents: 'asc' } },
+      },
     });
   }
 
   async findPublishedBySlug(slug: string) {
+    await this.reservationsService.expirePendingReservations();
     const event = await this.prisma.event.findFirst({
       where: { slug, status: EventStatus.PUBLISHED },
-      include: { organizer: { select: { name: true } } },
+      include: {
+        organizer: { select: { name: true } },
+        ticketTypes: { orderBy: { priceCents: 'asc' } },
+      },
     });
 
     if (!event) {
@@ -50,11 +62,16 @@ export class EventsService {
     return this.prisma.event.findMany({
       where: { organizerId },
       orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
+      include: { ticketTypes: { orderBy: { priceCents: 'asc' } } },
     });
   }
 
   async findByOrganizer(id: string, organizerId: string) {
-    return this.requireOwnedEvent(id, organizerId);
+    const event = await this.requireOwnedEvent(id, organizerId);
+    return this.prisma.event.findUniqueOrThrow({
+      where: { id: event.id },
+      include: { ticketTypes: { orderBy: { priceCents: 'asc' } } },
+    });
   }
 
   async create(organizerId: string, input: CreateEventDto) {
@@ -126,6 +143,22 @@ export class EventsService {
 
     if (event.status === EventStatus.PUBLISHED) {
       return event;
+    }
+
+    if (event.saleMode === EventSaleMode.RESERVED_SEATING) {
+      throw new BadRequestException(
+        'A publicação com assentos reservados estará disponível na fase de mapa de assentos.',
+      );
+    }
+
+    const ticketTypeCount = await this.prisma.ticketType.count({
+      where: { eventId: id },
+    });
+
+    if (ticketTypeCount === 0) {
+      throw new BadRequestException(
+        'Cadastre pelo menos um tipo de ingresso antes de publicar o evento.',
+      );
     }
 
     return this.prisma.event.update({
