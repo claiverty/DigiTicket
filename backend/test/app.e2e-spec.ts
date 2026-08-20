@@ -182,6 +182,25 @@ describe('Aplicação (e2e)', () => {
       .expect(404);
   });
 
+  it('protege a portaria por autenticação e papel GATE', async () => {
+    await request(app.getHttpServer()).get('/api/gate/events').expect(401);
+
+    const registerResponse = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({
+        name: 'Cliente sem acesso à portaria',
+        email: 'cliente-portaria@email.com',
+        password: 'Senha123!',
+      })
+      .expect(201);
+    const registration = registerResponse.body as { accessToken: string };
+
+    await request(app.getHttpServer())
+      .get('/api/gate/events')
+      .set('Authorization', `Bearer ${registration.accessToken}`)
+      .expect(403);
+  });
+
   afterEach(async () => {
     await app.close();
   });

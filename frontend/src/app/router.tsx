@@ -15,6 +15,7 @@ import { CheckoutPage } from '../pages/checkout-page';
 import { MyTicketsPage } from '../pages/my-tickets-page';
 import { TicketDetailsPage } from '../pages/ticket-details-page';
 import { SharedTicketPage } from '../pages/shared-ticket-page';
+import { GatePage } from '../pages/gate-page';
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
                 element: <TicketTypesPage />,
               },
             ],
+          },
+          {
+            element: <RoleRoute allowedRoles={['GATE']} />,
+            children: [{ path: 'portaria', element: <GatePage /> }],
           },
         ],
       },

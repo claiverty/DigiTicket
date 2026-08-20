@@ -32,6 +32,11 @@ export function AppLayout() {
                     </Link>
                   </>
                 )}
+                {user.role === 'GATE' && (
+                  <Link className="text-sm text-slate-300 hover:text-white" to="/portaria">
+                    Portaria
+                  </Link>
+                )}
                 <Link className="text-sm text-slate-300 hover:text-white" to="/perfil">
                   {user.name.split(' ')[0]}
                 </Link>

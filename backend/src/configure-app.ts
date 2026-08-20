@@ -25,7 +25,7 @@ export function configureApp(app: INestApplication): void {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('DigiTicket API')
     .setDescription('API REST da plataforma de eventos e ingressos DigiTicket.')
-    .setVersion('0.6.0')
+    .setVersion('0.7.0')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

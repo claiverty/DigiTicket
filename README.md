@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 6 — ingressos com QR assinado e compartilhamento implementados.
+> Status atual: Fase 7 — validação de ingressos na portaria implementada.
 
 ## Sobre
 
@@ -82,6 +82,11 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Links públicos de compartilhamento com token aleatório.
 - Geração de novo link e revogação imediata do link anterior.
 - Visualização compartilhada sem transferência de propriedade.
+- Área exclusiva para o papel `GATE` com seleção de evento.
+- Leitura de QR Code pela câmera e entrada por código manual.
+- Resultados claros: `VALID`, `INVALID`, `WRONG_EVENT` e `ALREADY_USED`.
+- Consumo atômico do ingresso para impedir duas entradas simultâneas.
+- Histórico das tentativas de validação sem armazenar o código apresentado em texto puro.
 
 ## Autenticação
 
@@ -217,7 +222,39 @@ O `ticketCode`, o código manual e o `shareToken` são criados com aleatoriedade
 5. Gere um novo link e confirme que o anterior deixa de funcionar.
 6. Revogue o link e confirme que a página pública passa a informar que ele é inválido.
 
-A portaria ainda não consome o QR nesta fase. A verificação da assinatura, o consumo atômico e os resultados `VALID`, `INVALID`, `WRONG_EVENT` e `ALREADY_USED` pertencem à próxima fase.
+## Portaria e validação
+
+A área `/portaria` é exclusiva para usuários com papel `GATE`. O operador seleciona um evento publicado e pode escanear o QR Code pela câmera ou digitar o código manual exibido no ingresso.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/gate/events` | Portaria | Lista eventos publicados disponíveis para validação. |
+| `POST` | `/api/gate/events/:eventId/validate` | Portaria | Valida e consome um QR ou código manual. |
+| `GET` | `/api/gate/events/:eventId/validations` | Portaria | Lista as 20 tentativas mais recentes do evento. |
+
+Antes de consultar um ingresso pelo QR, o backend verifica sua assinatura HMAC. Depois, compara o evento selecionado, o evento do ingresso e o estado persistido. Um ingresso ativo é alterado para `USED` por uma atualização condicional dentro da transação:
+
+```sql
+UPDATE tickets
+SET status = 'USED', used_at = NOW()
+WHERE id = :ticketId
+  AND event_id = :eventId
+  AND status = 'ACTIVE';
+```
+
+Somente uma tentativa consegue alterar a linha. Se outra validação simultânea perder essa disputa, recebe `ALREADY_USED`. Todas as tentativas são registradas em `TicketValidationLog`; por segurança, o valor apresentado é armazenado somente como hash SHA-256.
+
+### Como testar a portaria
+
+1. Entre como `cliente1@demo.com` e abra um ingresso ativo em `Meus Ingressos`.
+2. Copie o código manual ou mantenha o QR Code aberto em outro dispositivo ou janela.
+3. Saia e entre como `portaria@demo.com`.
+4. Abra `Portaria`, selecione o evento correto e valide o ingresso.
+5. Confirme o resultado `VÁLIDO` e valide novamente para receber `JÁ UTILIZADO`.
+6. Selecione outro evento e apresente um ingresso válido para conferir `EVENTO ERRADO`.
+7. Digite um código inexistente para conferir `INVÁLIDO`.
+
+A câmera exige permissão do navegador e um contexto seguro. Em desenvolvimento, `localhost` é aceito; em uma publicação real, a página deve usar HTTPS. A entrada manual continua disponível como alternativa.
 
 ## Arquitetura atual
 
@@ -242,6 +279,7 @@ O frontend não acessará diretamente o banco. Regras críticas serão implement
 - TanStack Query
 - React Hook Form
 - Zod
+- ZXing para leitura de QR Code no navegador
 
 ### Backend
 
@@ -331,7 +369,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos e segurança dos ingressos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança e validação dos ingressos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -378,7 +416,7 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Validação de ingressos na portaria e registro de tentativas.
+1. Transferência gratuita de ingresso para outra conta, com aceite, histórico e novos códigos.
 2. Integração para pesquisa e importação de eventos externos.
 3. Mapa simples de assentos reservados.
 4. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
@@ -386,7 +424,7 @@ As próximas funcionalidades serão adicionadas e documentadas por fase:
 ## Limitações atuais
 
 - Pagamentos são inteiramente simulados e não realizam cobrança financeira.
-- A portaria ainda não valida nem consome os ingressos emitidos.
+- A transferência de titularidade entre contas será implementada na próxima etapa; o link atual serve apenas para visualização compartilhada.
 - Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.
