@@ -14,6 +14,24 @@ enum Role {
   GATE
 }
 
+enum EventCategory {
+  SHOW
+  MOVIE
+  THEATER
+  OTHER
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+enum EventSaleMode {
+  GENERAL_ADMISSION
+  RESERVED_SEATING
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -22,6 +40,36 @@ model User {
   role         Role     @default(CUSTOMER)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  events        Event[]
 
   @@map("users")
+}
+
+model Event {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizerId    String        @map("organizer_id") @db.Uuid
+  title          String
+  slug           String        @unique
+  description    String        @db.Text
+  category       EventCategory
+  saleMode       EventSaleMode @map("sale_mode")
+  venueName      String        @map("venue_name")
+  address        String
+  city           String
+  state          String        @db.Char(2)
+  startDate      DateTime      @map("start_date")
+  endDate        DateTime      @map("end_date")
+  posterUrl      String?       @map("poster_url")
+  status         EventStatus   @default(DRAFT)
+  externalSource String?       @map("external_source")
+  externalId     String?       @map("external_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  organizer      User          @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+
+  @@unique([externalSource, externalId])
+  @@index([organizerId, status])
+  @@index([status, startDate])
+  @@index([category, city])
+  @@map("events")
 }

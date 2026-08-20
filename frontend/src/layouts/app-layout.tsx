@@ -12,8 +12,16 @@ export function AppLayout() {
             digi<span className="text-emerald-400">ticket</span>
           </Link>
           <nav className="flex items-center gap-3" aria-label="Navegação principal">
+            <Link className="text-sm text-slate-300 hover:text-white" to="/">
+              Eventos
+            </Link>
             {user ? (
               <>
+                {user.role === 'ORGANIZER' && (
+                  <Link className="text-sm text-slate-300 hover:text-white" to="/organizador">
+                    Organizador
+                  </Link>
+                )}
                 <Link className="text-sm text-slate-300 hover:text-white" to="/perfil">
                   {user.name.split(' ')[0]}
                 </Link>

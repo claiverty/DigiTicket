@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 2 — autenticação implementada e conectada ao Supabase.
+> Status atual: Fase 3 — gestão de eventos e catálogo público implementados.
 
 ## Sobre
 
@@ -49,6 +49,14 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Telas de cadastro e login no frontend.
 - Sessão persistida no navegador, logout e rota de perfil protegida.
 - Testes unitários e e2e para cadastro, login, JWT e acesso por papel.
+- Modelo `Event` com categorias, modos de venda e estados de publicação.
+- CRUD de eventos restrito ao organizador proprietário.
+- Publicação, cancelamento e exclusão segura de rascunhos.
+- Slugs legíveis e únicos para URLs públicas.
+- Catálogo público com busca, categoria, cidade, data e ordenação cronológica.
+- Página pública de detalhes do evento.
+- Dashboard inicial do organizador com métricas e gestão de eventos.
+- Seed com um evento publicado e um rascunho de demonstração.
 
 ## Autenticação
 
@@ -66,6 +74,23 @@ Estas contas estão disponíveis no ambiente configurado:
 | Cliente | `cliente1@demo.com` | `Demo123!` |
 | Cliente | `cliente2@demo.com` | `Demo123!` |
 | Portaria | `portaria@demo.com` | `Demo123!` |
+
+## Eventos
+
+Somente eventos com status `PUBLISHED` aparecem no catálogo. Eventos novos sempre nascem como `DRAFT`, e somente o organizador proprietário pode consultá-los ou alterá-los na área de gestão.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/events` | Público | Lista eventos publicados com busca e filtros. |
+| `GET` | `/api/events/:slug` | Público | Exibe os detalhes de um evento publicado. |
+| `GET` | `/api/organizer/events` | Organizador | Lista exclusivamente os eventos próprios. |
+| `POST` | `/api/organizer/events` | Organizador | Cria um evento em rascunho. |
+| `PATCH` | `/api/organizer/events/:id` | Organizador proprietário | Edita um evento não cancelado. |
+| `POST` | `/api/organizer/events/:id/publish` | Organizador proprietário | Publica um evento. |
+| `POST` | `/api/organizer/events/:id/cancel` | Organizador proprietário | Cancela sem apagar o histórico. |
+| `DELETE` | `/api/organizer/events/:id` | Organizador proprietário | Exclui somente um rascunho. |
+
+O seed inclui `Festival Luzes da Cidade`, publicado no catálogo, e `Mostra de Cinema Brasileiro`, mantido como rascunho no dashboard do organizador.
 
 ## Arquitetura atual
 
@@ -177,7 +202,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. A migration de autenticação e o seed já foram aplicados.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação e eventos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -224,16 +249,16 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Criação, edição, publicação e catálogo de eventos.
-2. Tipos de ingresso, estoque e reservas temporárias.
-3. Checkout e pagamento simulado.
-4. Emissão de ingressos com QR Code assinado e compartilhamento.
-5. Validação de ingressos na portaria e registro de tentativas.
-6. Integração para pesquisa e importação de eventos externos.
-7. Mapa simples de assentos reservados.
-8. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Tipos de ingresso, estoque e reservas temporárias.
+2. Checkout e pagamento simulado.
+3. Emissão de ingressos com QR Code assinado e compartilhamento.
+4. Validação de ingressos na portaria e registro de tentativas.
+5. Integração para pesquisa e importação de eventos externos.
+6. Mapa simples de assentos reservados.
+7. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
-- Eventos, reservas, pagamentos e ingressos ainda não estão implementados.
+- Tipos de ingresso, reservas, pagamentos e ingressos ainda não estão implementados.
+- O catálogo ainda não exibe preços porque os tipos de ingresso pertencem à próxima fase.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.

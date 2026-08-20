@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
 import type { Role } from '../types/auth';
 
@@ -36,6 +37,14 @@ export function ProfilePage() {
           <dd className="mt-1 font-medium text-emerald-300">{roleLabels[user.role]}</dd>
         </div>
       </dl>
+      {user.role === 'ORGANIZER' && (
+        <Link
+          to="/organizador"
+          className="mt-8 inline-block rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-300"
+        >
+          Gerenciar eventos
+        </Link>
+      )}
     </section>
   );
 }

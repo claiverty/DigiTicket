@@ -70,6 +70,9 @@ describe('Aplicação (e2e)', () => {
           return toPublicUser(user);
         }),
       },
+      event: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -145,6 +148,25 @@ describe('Aplicação (e2e)', () => {
         role: Role.ORGANIZER,
       })
       .expect(400);
+  });
+
+  it('expõe o catálogo e protege a gestão de eventos por papel', async () => {
+    await request(app.getHttpServer()).get('/api/events').expect(200, []);
+
+    const registerResponse = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({
+        name: 'Cliente sem permissão',
+        email: 'cliente-eventos@email.com',
+        password: 'Senha123!',
+      })
+      .expect(201);
+    const registration = registerResponse.body as { accessToken: string };
+
+    await request(app.getHttpServer())
+      .get('/api/organizer/events')
+      .set('Authorization', `Bearer ${registration.accessToken}`)
+      .expect(403);
   });
 
   afterEach(async () => {
