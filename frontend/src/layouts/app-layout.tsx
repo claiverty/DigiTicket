@@ -23,9 +23,14 @@ export function AppLayout() {
                   </Link>
                 )}
                 {user.role === 'CUSTOMER' && (
-                  <Link className="text-sm text-slate-300 hover:text-white" to="/minhas-reservas">
-                    Minhas reservas
-                  </Link>
+                  <>
+                    <Link className="text-sm text-slate-300 hover:text-white" to="/minhas-reservas">
+                      Reservas
+                    </Link>
+                    <Link className="text-sm text-slate-300 hover:text-white" to="/meus-ingressos">
+                      Ingressos
+                    </Link>
+                  </>
                 )}
                 <Link className="text-sm text-slate-300 hover:text-white" to="/perfil">
                   {user.name.split(' ')[0]}

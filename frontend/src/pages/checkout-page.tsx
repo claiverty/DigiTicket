@@ -63,7 +63,7 @@ export function CheckoutPage() {
           </p>
           {approved && <p className="mt-3 text-sm text-slate-400">QR Code, código manual e a área “Meus Ingressos” serão adicionados na próxima fase.</p>}
           <p className="mt-6 text-sm font-semibold text-slate-200">Total simulado: {formatMoney(result.payment.amountCents)}</p>
-          <Link to="/minhas-reservas" className="mt-8 inline-block rounded-xl bg-white px-5 py-3 font-semibold text-slate-950">Voltar às reservas</Link>
+          <Link to={approved ? '/meus-ingressos' : '/minhas-reservas'} className="mt-8 inline-block rounded-xl bg-white px-5 py-3 font-semibold text-slate-950">{approved ? 'Abrir meus ingressos' : 'Voltar às reservas'}</Link>
         </div>
       </section>
     );

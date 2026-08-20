@@ -174,6 +174,10 @@ model Ticket {
   reservationId     String          @map("reservation_id") @db.Uuid
   reservationItemId String          @map("reservation_item_id") @db.Uuid
   ticketTypeId      String          @map("ticket_type_id") @db.Uuid
+  ticketCode        String          @unique @map("ticket_code")
+  manualCode        String          @unique @map("manual_code")
+  shareToken        String?         @unique @map("share_token")
+  sharedAt          DateTime?       @map("shared_at")
   status            TicketStatus    @default(ACTIVE)
   usedAt            DateTime?       @map("used_at")
   createdAt         DateTime        @default(now()) @map("created_at")

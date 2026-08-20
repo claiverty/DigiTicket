@@ -86,6 +86,10 @@ describe('PaymentsService', () => {
       prisma as unknown as PrismaService,
       reservationsService as never,
       new PaymentSimulatorService(),
+      {
+        createTicketCode: jest.fn().mockReturnValue('ticket-code'),
+        createManualCode: jest.fn().mockReturnValue('DT-AAAA-BBBB-CCCC'),
+      } as never,
     );
 
     return { service, transaction, getCreatedTickets: () => createdTickets };

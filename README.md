@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 5 — checkout e pagamento simulado implementados.
+> Status atual: Fase 6 — ingressos com QR assinado e compartilhamento implementados.
 
 ## Sobre
 
@@ -75,6 +75,13 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Recusa transacional com devolução imediata do estoque.
 - Proteção contra duas confirmações simultâneas da mesma reserva.
 - Histórico de pagamentos relacionado individualmente às reservas.
+- Um ingresso individual gerado para cada unidade aprovada.
+- Código interno aleatório e código manual único por ingresso.
+- QR Code protegido por assinatura HMAC-SHA256.
+- Página `Meus Ingressos` e detalhe individual protegido por proprietário.
+- Links públicos de compartilhamento com token aleatório.
+- Geração de novo link e revogação imediata do link anterior.
+- Visualização compartilhada sem transferência de propriedade.
 
 ## Autenticação
 
@@ -179,7 +186,38 @@ Uma reserva aceita somente uma tentativa final de pagamento simulado. Isso deixa
 6. Escolha `Simular recusa`.
 7. Confirme que nenhum ingresso foi criado e que o estoque foi devolvido.
 
-Os registros-base dos ingressos já são criados na aprovação. QR Code, código manual, compartilhamento e páginas de visualização pertencem à próxima fase.
+## Ingressos e QR Code
+
+Cada unidade de uma compra aprovada gera um registro `Ticket` independente. O ingresso possui um código interno aleatório, um código manual como `DT-8F4A-2B19-7C3E` e um token de QR assinado pelo servidor.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/tickets` | Cliente | Lista somente os ingressos próprios. |
+| `GET` | `/api/tickets/:id` | Cliente proprietário | Exibe QR, código e dados de um ingresso próprio. |
+| `POST` | `/api/tickets/:id/share` | Cliente proprietário | Gera ou substitui o link compartilhável. |
+| `DELETE` | `/api/tickets/:id/share` | Cliente proprietário | Revoga imediatamente o link atual. |
+| `GET` | `/api/tickets/shared/:shareToken` | Público com token | Exibe o ingresso por um link válido. |
+
+O QR Code não contém somente o ID. Seu token segue conceitualmente:
+
+```text
+ticketCode.eventId.assinaturaHmac
+```
+
+A assinatura usa HMAC-SHA256 com `TICKET_SIGNING_SECRET`. Alterar qualquer parte invalida o token, e o banco continuará sendo a fonte final da verdade durante a validação na portaria.
+
+O `ticketCode`, o código manual e o `shareToken` são criados com aleatoriedade criptográfica. O token compartilhável não é o ID do ingresso, não transfere propriedade e pode ser substituído ou revogado pelo proprietário.
+
+### Como testar os ingressos
+
+1. Entre como cliente e aprove um pagamento simulado.
+2. Abra `Meus Ingressos` no cabeçalho.
+3. Selecione um ingresso e confira QR Code, código manual, evento, tipo e titular.
+4. Gere um link compartilhável e abra-o em uma janela sem login.
+5. Gere um novo link e confirme que o anterior deixa de funcionar.
+6. Revogue o link e confirme que a página pública passa a informar que ele é inválido.
+
+A portaria ainda não consome o QR nesta fase. A verificação da assinatura, o consumo atômico e os resultados `VALID`, `INVALID`, `WRONG_EVENT` e `ALREADY_USED` pertencem à próxima fase.
 
 ## Arquitetura atual
 
@@ -289,9 +327,11 @@ TICKETMASTER_API_KEY=
 
 Credenciais reais devem existir somente nos arquivos `.env`, que não são versionados.
 
+`JWT_SECRET` e `TICKET_SIGNING_SECRET` devem possuir pelo menos 32 caracteres. Use valores diferentes e aleatórios em cada ambiente.
+
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas e pagamentos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos e segurança dos ingressos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -338,16 +378,15 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Emissão de ingressos com QR Code assinado e compartilhamento.
-2. Validação de ingressos na portaria e registro de tentativas.
-3. Integração para pesquisa e importação de eventos externos.
-4. Mapa simples de assentos reservados.
-5. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Validação de ingressos na portaria e registro de tentativas.
+2. Integração para pesquisa e importação de eventos externos.
+3. Mapa simples de assentos reservados.
+4. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
 - Pagamentos são inteiramente simulados e não realizam cobrança financeira.
-- Os ingressos-base são criados, mas QR Code, código manual, compartilhamento e páginas de visualização ainda não estão implementados.
+- A portaria ainda não valida nem consome os ingressos emitidos.
 - Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.

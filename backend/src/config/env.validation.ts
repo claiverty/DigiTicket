@@ -18,11 +18,23 @@ export function validateEnvironment(config: Environment): Environment {
     throw new Error('JWT_SECRET deve possuir pelo menos 32 caracteres.');
   }
 
+  const ticketSigningSecret =
+    typeof config.TICKET_SIGNING_SECRET === 'string'
+      ? config.TICKET_SIGNING_SECRET
+      : '';
+
+  if (ticketSigningSecret.length < 32) {
+    throw new Error(
+      'TICKET_SIGNING_SECRET deve possuir pelo menos 32 caracteres.',
+    );
+  }
+
   return {
     ...config,
     PORT: parsePort(config.PORT),
     FRONTEND_URL: config.FRONTEND_URL ?? 'http://localhost:5173',
     JWT_SECRET: jwtSecret,
     JWT_EXPIRES_IN: config.JWT_EXPIRES_IN ?? '7d',
+    TICKET_SIGNING_SECRET: ticketSigningSecret,
   };
 }

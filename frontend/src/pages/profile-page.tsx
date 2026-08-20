@@ -46,12 +46,20 @@ export function ProfilePage() {
         </Link>
       )}
       {user.role === 'CUSTOMER' && (
-        <Link
-          to="/minhas-reservas"
-          className="mt-8 inline-block rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-300"
-        >
-          Ver minhas reservas
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            to="/minhas-reservas"
+            className="rounded-xl border border-white/10 px-5 py-3 font-semibold text-slate-200"
+          >
+            Ver minhas reservas
+          </Link>
+          <Link
+            to="/meus-ingressos"
+            className="rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-300"
+          >
+            Abrir meus ingressos
+          </Link>
+        </div>
       )}
     </section>
   );

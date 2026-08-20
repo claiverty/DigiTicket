@@ -123,7 +123,10 @@ function ReservationCard({
             </div>
           )}
           {reservation.status === 'PAID' && (
-            <p className="mt-5 border-t border-white/10 pt-5 text-sm text-emerald-200">{reservation._count.tickets} ingresso(s) emitidos. A visualização com QR Code chega na próxima fase.</p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5 text-sm text-emerald-200">
+              <span>{reservation._count.tickets} ingresso(s) emitidos.</span>
+              <Link to="/meus-ingressos" className="font-semibold text-emerald-300">Abrir ingressos →</Link>
+            </div>
           )}
           {reservation.status === 'DECLINED' && (
             <p className="mt-5 border-t border-white/10 pt-5 text-sm text-rose-200">Pagamento recusado. O estoque desta reserva foi liberado.</p>

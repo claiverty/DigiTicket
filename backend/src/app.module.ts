@@ -14,6 +14,7 @@ import { EventsModule } from './events/events.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { TicketTypesModule } from './ticket-types/ticket-types.module';
 import { PaymentsModule } from './payments/payments.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PaymentsModule } from './payments/payments.module';
     TicketTypesModule,
     ReservationsModule,
     PaymentsModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [

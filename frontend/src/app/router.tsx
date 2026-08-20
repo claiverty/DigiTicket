@@ -12,6 +12,9 @@ import { EventFormPage } from '../pages/event-form-page';
 import { TicketTypesPage } from '../pages/ticket-types-page';
 import { MyReservationsPage } from '../pages/my-reservations-page';
 import { CheckoutPage } from '../pages/checkout-page';
+import { MyTicketsPage } from '../pages/my-tickets-page';
+import { TicketDetailsPage } from '../pages/ticket-details-page';
+import { SharedTicketPage } from '../pages/shared-ticket-page';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +25,10 @@ export const router = createBrowserRouter([
       { path: 'entrar', element: <LoginPage /> },
       { path: 'cadastro', element: <RegisterPage /> },
       {
+        path: 'ingresso/compartilhado/:shareToken',
+        element: <SharedTicketPage />,
+      },
+      {
         element: <ProtectedRoute />,
         children: [
           { path: 'perfil', element: <ProfilePage /> },
@@ -30,6 +37,11 @@ export const router = createBrowserRouter([
             children: [
               { path: 'minhas-reservas', element: <MyReservationsPage /> },
               { path: 'checkout/:id', element: <CheckoutPage /> },
+              { path: 'meus-ingressos', element: <MyTicketsPage /> },
+              {
+                path: 'meus-ingressos/:id',
+                element: <TicketDetailsPage />,
+              },
             ],
           },
           {

@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReservationsService } from '../reservations/reservations.service';
+import { TicketSecurityService } from '../tickets/ticket-security.service';
 import { PaymentSimulatorService } from './payment-simulator.service';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly reservationsService: ReservationsService,
     private readonly simulator: PaymentSimulatorService,
+    private readonly ticketSecurity: TicketSecurityService,
   ) {}
 
   async simulate(
@@ -107,6 +109,8 @@ export class PaymentsService {
               reservationItemId: item.id,
               ticketTypeId: item.ticketTypeId,
               status: TicketStatus.ACTIVE,
+              ticketCode: this.ticketSecurity.createTicketCode(),
+              manualCode: this.ticketSecurity.createManualCode(),
             });
           }
         }

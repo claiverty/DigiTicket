@@ -76,6 +76,9 @@ describe('Aplicação (e2e)', () => {
       reservation: {
         findMany: jest.fn().mockResolvedValue([]),
       },
+      ticket: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -170,6 +173,13 @@ describe('Aplicação (e2e)', () => {
       .get('/api/organizer/events')
       .set('Authorization', `Bearer ${registration.accessToken}`)
       .expect(403);
+  });
+
+  it('protege ingressos próprios e permite consultar um link público', async () => {
+    await request(app.getHttpServer()).get('/api/tickets').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/tickets/shared/token-inexistente')
+      .expect(404);
   });
 
   afterEach(async () => {
