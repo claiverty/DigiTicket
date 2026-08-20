@@ -40,6 +40,17 @@ enum ReservationStatus {
   CANCELLED
 }
 
+enum PaymentStatus {
+  APPROVED
+  DECLINED
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+  CANCELLED
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -50,6 +61,7 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
   events        Event[]
   reservations  Reservation[]
+  tickets       Ticket[]
 
   @@map("users")
 }
@@ -77,6 +89,7 @@ model Event {
   organizer      User          @relation(fields: [organizerId], references: [id], onDelete: Restrict)
   ticketTypes    TicketType[]
   reservations   Reservation[]
+  tickets        Ticket[]
 
   @@unique([externalSource, externalId])
   @@index([organizerId, status])
@@ -97,6 +110,7 @@ model TicketType {
   updatedAt         DateTime          @updatedAt @map("updated_at")
   event              Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
   reservationItems  ReservationItem[]
+  tickets           Ticket[]
 
   @@unique([eventId, name])
   @@index([eventId])
@@ -115,6 +129,8 @@ model Reservation {
   customer   User              @relation(fields: [customerId], references: [id], onDelete: Restrict)
   event      Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
   items      ReservationItem[]
+  payment    Payment?
+  tickets    Ticket[]
 
   @@index([customerId, createdAt])
   @@index([status, expiresAt])
@@ -131,8 +147,45 @@ model ReservationItem {
   createdAt      DateTime    @default(now()) @map("created_at")
   reservation    Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   ticketType     TicketType  @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  tickets        Ticket[]
 
   @@unique([reservationId, ticketTypeId])
   @@index([ticketTypeId])
   @@map("reservation_items")
+}
+
+model Payment {
+  id            String        @id @default(uuid()) @db.Uuid
+  reservationId String        @unique @map("reservation_id") @db.Uuid
+  status        PaymentStatus
+  amountCents   Int           @map("amount_cents")
+  processedAt   DateTime      @default(now()) @map("processed_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  reservation   Reservation   @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+
+  @@index([status, processedAt])
+  @@map("payments")
+}
+
+model Ticket {
+  id                String          @id @default(uuid()) @db.Uuid
+  eventId           String          @map("event_id") @db.Uuid
+  customerId        String          @map("customer_id") @db.Uuid
+  reservationId     String          @map("reservation_id") @db.Uuid
+  reservationItemId String          @map("reservation_item_id") @db.Uuid
+  ticketTypeId      String          @map("ticket_type_id") @db.Uuid
+  status            TicketStatus    @default(ACTIVE)
+  usedAt            DateTime?       @map("used_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  event              Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  customer           User            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  reservation        Reservation     @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  reservationItem    ReservationItem @relation(fields: [reservationItemId], references: [id], onDelete: Restrict)
+  ticketType          TicketType      @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+
+  @@index([customerId, createdAt])
+  @@index([eventId, status])
+  @@index([reservationId])
+  @@map("tickets")
 }

@@ -13,6 +13,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { EventsModule } from './events/events.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { TicketTypesModule } from './ticket-types/ticket-types.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TicketTypesModule } from './ticket-types/ticket-types.module';
     EventsModule,
     TicketTypesModule,
     ReservationsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

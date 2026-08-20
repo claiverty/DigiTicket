@@ -20,6 +20,10 @@ export function getMyReservations(token: string) {
   return apiRequest<Reservation[]>('/api/reservations', { token });
 }
 
+export function getReservation(id: string, token: string) {
+  return apiRequest<Reservation>(`/api/reservations/${id}`, { token });
+}
+
 export function cancelReservation(id: string, token: string) {
   return apiRequest<Reservation>(`/api/reservations/${id}/cancel`, {
     method: 'POST',

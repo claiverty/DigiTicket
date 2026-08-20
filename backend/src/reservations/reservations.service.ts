@@ -244,5 +244,7 @@ export class ReservationsService {
         ticketType: { select: { id: true, name: true } },
       },
     },
+    payment: true,
+    _count: { select: { tickets: true } },
   } satisfies Prisma.ReservationInclude;
 }

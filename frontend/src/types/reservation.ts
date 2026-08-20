@@ -37,6 +37,25 @@ export interface Reservation {
     startDate: string;
   };
   items: ReservationItem[];
+  payment: Payment | null;
+  _count: { tickets: number };
+}
+
+export type PaymentStatus = 'APPROVED' | 'DECLINED';
+
+export interface Payment {
+  id: string;
+  reservationId: string;
+  status: PaymentStatus;
+  amountCents: number;
+  processedAt: string;
+  createdAt: string;
+}
+
+export interface PaymentResult {
+  payment: Payment;
+  reservation: Reservation;
+  ticketsCreated: number;
 }
 
 export interface CreateReservationInput {

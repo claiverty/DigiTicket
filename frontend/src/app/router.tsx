@@ -11,6 +11,7 @@ import { OrganizerDashboardPage } from '../pages/organizer-dashboard-page';
 import { EventFormPage } from '../pages/event-form-page';
 import { TicketTypesPage } from '../pages/ticket-types-page';
 import { MyReservationsPage } from '../pages/my-reservations-page';
+import { CheckoutPage } from '../pages/checkout-page';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
             element: <RoleRoute allowedRoles={['CUSTOMER']} />,
             children: [
               { path: 'minhas-reservas', element: <MyReservationsPage /> },
+              { path: 'checkout/:id', element: <CheckoutPage /> },
             ],
           },
           {

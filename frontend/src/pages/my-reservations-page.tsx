@@ -116,8 +116,17 @@ function ReservationCard({
           {isPending && (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5">
               <p className="font-mono text-sm text-amber-200">Expira em {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
-              <button type="button" disabled={cancelling} onClick={onCancel} className="rounded-lg border border-rose-300/20 px-3 py-2 text-sm text-rose-200 disabled:opacity-50">Cancelar e liberar estoque</button>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" disabled={cancelling} onClick={onCancel} className="rounded-lg border border-rose-300/20 px-3 py-2 text-sm text-rose-200 disabled:opacity-50">Cancelar</button>
+                <Link to={`/checkout/${reservation.id}`} className="rounded-lg bg-emerald-400 px-3 py-2 text-sm font-semibold text-slate-950">Ir para pagamento</Link>
+              </div>
             </div>
+          )}
+          {reservation.status === 'PAID' && (
+            <p className="mt-5 border-t border-white/10 pt-5 text-sm text-emerald-200">{reservation._count.tickets} ingresso(s) emitidos. A visualização com QR Code chega na próxima fase.</p>
+          )}
+          {reservation.status === 'DECLINED' && (
+            <p className="mt-5 border-t border-white/10 pt-5 text-sm text-rose-200">Pagamento recusado. O estoque desta reserva foi liberado.</p>
           )}
         </div>
       </div>

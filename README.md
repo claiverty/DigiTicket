@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 4 — venda por quantidade, estoque e reservas temporárias implementados.
+> Status atual: Fase 5 — checkout e pagamento simulado implementados.
 
 ## Sobre
 
@@ -67,6 +67,14 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Expiração lazy e cancelamento com devolução transacional ao estoque.
 - Página protegida `Minhas reservas` com contagem regressiva.
 - Constraints no PostgreSQL para impedir valores e estoques inválidos.
+- Checkout protegido para reservas pendentes.
+- Pagamento simulado com aprovação e recusa explícitas.
+- Nenhum dado real de cartão solicitado ou armazenado.
+- Valor do pagamento recalculado exclusivamente no backend.
+- Aprovação transacional da reserva e criação de um ingresso-base por unidade.
+- Recusa transacional com devolução imediata do estoque.
+- Proteção contra duas confirmações simultâneas da mesma reserva.
+- Histórico de pagamentos relacionado individualmente às reservas.
 
 ## Autenticação
 
@@ -142,7 +150,36 @@ Reservas vencidas são processadas de forma lazy ao consultar catálogo e reserv
 6. Cancele a reserva e confirme que a quantidade retorna ao catálogo.
 7. Para testar a expiração, deixe uma reserva vencer e atualize o catálogo ou a página de reservas após 10 minutos.
 
-O checkout ainda não aparece porque será implementado na próxima fase.
+## Checkout e pagamento simulado
+
+O checkout existe somente para demonstrar as regras da compra. Nenhuma cobrança financeira é realizada e a interface não possui campos de cartão. O cliente escolhe deliberadamente entre `APPROVED` e `DECLINED`.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `POST` | `/api/payments/reservations/:reservationId/simulate` | Cliente proprietário | Simula aprovação ou recusa de uma reserva pendente. |
+
+O frontend não envia preço nem total. Antes de processar, o backend:
+
+1. verifica propriedade, estado e validade da reserva;
+2. recalcula o total usando `unitPriceCents` e as quantidades persistidas;
+3. altera a reserva por uma atualização condicional;
+4. registra o pagamento;
+5. cria um `Ticket` para cada unidade aprovada ou libera o estoque na recusa;
+6. confirma todas as alterações em uma única transação.
+
+Uma reserva aceita somente uma tentativa final de pagamento simulado. Isso deixa os estados previsíveis para a demonstração e impede aprovações duplicadas.
+
+### Como testar o checkout
+
+1. Entre como `cliente1@demo.com` e crie uma reserva no festival.
+2. Abra `Minhas reservas` e clique em `Ir para pagamento`.
+3. Escolha `Simular aprovação`.
+4. Confirme que a reserva aparece como paga e informa a quantidade de ingressos emitidos.
+5. Entre como `cliente2@demo.com` e crie outra reserva.
+6. Escolha `Simular recusa`.
+7. Confirme que nenhum ingresso foi criado e que o estoque foi devolvido.
+
+Os registros-base dos ingressos já são criados na aprovação. QR Code, código manual, compartilhamento e páginas de visualização pertencem à próxima fase.
 
 ## Arquitetura atual
 
@@ -254,7 +291,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação e eventos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas e pagamentos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -301,17 +338,16 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Checkout e pagamento simulado.
-2. Emissão de ingressos com QR Code assinado e compartilhamento.
-3. Validação de ingressos na portaria e registro de tentativas.
-4. Integração para pesquisa e importação de eventos externos.
-5. Mapa simples de assentos reservados.
-6. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Emissão de ingressos com QR Code assinado e compartilhamento.
+2. Validação de ingressos na portaria e registro de tentativas.
+3. Integração para pesquisa e importação de eventos externos.
+4. Mapa simples de assentos reservados.
+5. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
-- Pagamentos e emissão dos ingressos definitivos ainda não estão implementados.
-- Reservas temporárias não persistem dados de cartão nem realizam cobrança.
+- Pagamentos são inteiramente simulados e não realizam cobrança financeira.
+- Os ingressos-base são criados, mas QR Code, código manual, compartilhamento e páginas de visualização ainda não estão implementados.
 - Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.
