@@ -1,5 +1,6 @@
 import {
   TicketStatus,
+  TicketTransferStatus,
   TicketValidationMethod,
   TicketValidationResult,
 } from '@prisma/client';
@@ -29,6 +30,7 @@ describe('GateService', () => {
     customer: { name: 'Cliente Demo' },
     ticketType: { name: 'Pista' },
     event: { id: eventId, title: 'Festival Demo' },
+    transfers: [],
   };
 
   function createContext() {
@@ -68,7 +70,12 @@ describe('GateService', () => {
 
     expect(result.result).toBe(TicketValidationResult.VALID);
     expect(transaction.ticket.updateMany).toHaveBeenCalledWith({
-      where: { id: ticket.id, eventId, status: TicketStatus.ACTIVE },
+      where: {
+        id: ticket.id,
+        eventId,
+        status: TicketStatus.ACTIVE,
+        transfers: { none: { status: TicketTransferStatus.PENDING } },
+      },
       data: { status: TicketStatus.USED, usedAt: result.ticket?.usedAt },
     });
 
@@ -133,5 +140,22 @@ describe('GateService', () => {
     );
 
     expect(result.result).toBe(TicketValidationResult.ALREADY_USED);
+  });
+
+  it('bloqueia o ingresso enquanto existe transferência pendente', async () => {
+    const { service, transaction } = createContext();
+    transaction.ticket.findUnique.mockResolvedValue({
+      ...ticket,
+      transfers: [{ id: 'transfer-id' }],
+    });
+
+    const result = await service.validate(
+      eventId,
+      gateUserId,
+      ticket.manualCode,
+    );
+
+    expect(result.result).toBe(TicketValidationResult.INVALID);
+    expect(transaction.ticket.updateMany).not.toHaveBeenCalled();
   });
 });

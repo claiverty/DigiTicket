@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 7 — validação de ingressos na portaria implementada.
+> Status atual: Fase 7.1 — transferência segura de ingressos entre contas implementada.
 
 ## Sobre
 
@@ -87,6 +87,11 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Resultados claros: `VALID`, `INVALID`, `WRONG_EVENT` e `ALREADY_USED`.
 - Consumo atômico do ingresso para impedir duas entradas simultâneas.
 - Histórico das tentativas de validação sem armazenar o código apresentado em texto puro.
+- Solicitação de transferência gratuita para outra conta `CUSTOMER` pelo e-mail.
+- Aceite, recusa e cancelamento de transferências pendentes.
+- Troca transacional de titularidade com novos QR e código manual.
+- Bloqueio do ingresso na portaria enquanto a transferência aguarda decisão.
+- Histórico de transferências recebidas e enviadas.
 
 ## Autenticação
 
@@ -239,7 +244,11 @@ UPDATE tickets
 SET status = 'USED', used_at = NOW()
 WHERE id = :ticketId
   AND event_id = :eventId
-  AND status = 'ACTIVE';
+  AND status = 'ACTIVE'
+  AND NOT EXISTS (
+    SELECT 1 FROM ticket_transfers
+    WHERE ticket_id = :ticketId AND status = 'PENDING'
+  );
 ```
 
 Somente uma tentativa consegue alterar a linha. Se outra validação simultânea perder essa disputa, recebe `ALREADY_USED`. Todas as tentativas são registradas em `TicketValidationLog`; por segurança, o valor apresentado é armazenado somente como hash SHA-256.
@@ -255,6 +264,33 @@ Somente uma tentativa consegue alterar a linha. Se outra validação simultânea
 7. Digite um código inexistente para conferir `INVÁLIDO`.
 
 A câmera exige permissão do navegador e um contexto seguro. Em desenvolvimento, `localhost` é aceito; em uma publicação real, a página deve usar HTTPS. A entrada manual continua disponível como alternativa.
+
+## Transferência de titularidade
+
+A transferência é gratuita e ocorre somente entre contas com papel `CUSTOMER`; ela não implementa revenda. O titular solicita a transferência no detalhe do ingresso informando o e-mail do destinatário, que decide se aceita ou recusa na página `Transferências`.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `POST` | `/api/tickets/:ticketId/transfers` | Cliente proprietário | Solicita a transferência para outra conta. |
+| `GET` | `/api/ticket-transfers/incoming` | Cliente | Lista transferências recebidas. |
+| `GET` | `/api/ticket-transfers/outgoing` | Cliente | Lista transferências enviadas. |
+| `POST` | `/api/ticket-transfers/:id/accept` | Cliente destinatário | Aceita e assume a titularidade. |
+| `POST` | `/api/ticket-transfers/:id/decline` | Cliente destinatário | Recusa a solicitação. |
+| `POST` | `/api/ticket-transfers/:id/cancel` | Cliente remetente | Cancela uma solicitação pendente. |
+
+Somente ingressos ativos de eventos publicados podem ser transferidos. Existe no máximo uma solicitação pendente por ingresso, garantida também por índice parcial no PostgreSQL. Ao iniciar a transferência, qualquer link público é revogado e o ingresso fica temporariamente inválido na portaria.
+
+O aceite altera o `customerId`, o código interno, o código manual e o QR assinado dentro da mesma transação. Assim, o remetente perde o acesso e qualquer cópia dos códigos antigos deixa de funcionar. Se a solicitação for recusada ou cancelada, o ingresso permanece com o titular original e volta a ser aceito na portaria.
+
+### Como testar a transferência
+
+1. Garanta que `cliente1@demo.com` possui um ingresso ativo.
+2. Abra o ingresso, informe `cliente2@demo.com` e solicite a transferência.
+3. Confira que o ingresso exibe o estado pendente e fica inválido na portaria.
+4. Entre como `cliente2@demo.com`, abra `Transferências` e aceite.
+5. Confirme que o ingresso aparece na nova conta com novos QR e código manual.
+6. Confirme que a conta anterior não consegue mais abrir o ingresso.
+7. Repita com outro ingresso para testar a recusa e o cancelamento.
 
 ## Arquitetura atual
 
@@ -369,7 +405,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança e validação dos ingressos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança, validação e transferência dos ingressos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -416,15 +452,14 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Transferência gratuita de ingresso para outra conta, com aceite, histórico e novos códigos.
-2. Integração para pesquisa e importação de eventos externos.
-3. Mapa simples de assentos reservados.
-4. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Integração para pesquisa e importação de eventos externos.
+2. Mapa simples de assentos reservados.
+3. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
 - Pagamentos são inteiramente simulados e não realizam cobrança financeira.
-- A transferência de titularidade entre contas será implementada na próxima etapa; o link atual serve apenas para visualização compartilhada.
+- A transferência é gratuita e não inclui anúncio, preço ou revenda entre usuários.
 - Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.

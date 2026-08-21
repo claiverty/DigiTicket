@@ -40,6 +40,11 @@ export function TicketView({ ticket }: { ticket: TicketDisplay }) {
           <p className="mt-2 text-center text-xs font-medium">Ingresso assinado digitalmente</p>
         </div>
       </div>
+      {ticket.pendingTransfer && (
+        <div className="border-t border-amber-300/20 bg-amber-300/10 px-6 py-4 text-sm text-amber-100 sm:px-8">
+          Transferência pendente para {ticket.pendingTransfer.recipient.name}. Este ingresso fica bloqueado na portaria até a solicitação ser finalizada.
+        </div>
+      )}
     </article>
   );
 }

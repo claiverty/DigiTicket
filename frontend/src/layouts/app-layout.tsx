@@ -30,6 +30,9 @@ export function AppLayout() {
                     <Link className="text-sm text-slate-300 hover:text-white" to="/meus-ingressos">
                       Ingressos
                     </Link>
+                    <Link className="text-sm text-slate-300 hover:text-white" to="/transferencias">
+                      Transferências
+                    </Link>
                   </>
                 )}
                 {user.role === 'GATE' && (

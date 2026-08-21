@@ -59,6 +59,12 @@ export function ProfilePage() {
           >
             Abrir meus ingressos
           </Link>
+          <Link
+            to="/transferencias"
+            className="rounded-xl border border-white/10 px-5 py-3 font-semibold text-slate-200"
+          >
+            Ver transferências
+          </Link>
         </div>
       )}
       {user.role === 'GATE' && (

@@ -61,7 +61,7 @@ export function CheckoutPage() {
               ? `${result.ticketsCreated} ingresso(s) foram gerados para esta compra.`
               : 'Nenhum ingresso foi gerado e as quantidades retornaram ao estoque.'}
           </p>
-          {approved && <p className="mt-3 text-sm text-slate-400">QR Code, código manual e a área “Meus Ingressos” serão adicionados na próxima fase.</p>}
+          {approved && <p className="mt-3 text-sm text-slate-400">O QR Code e o código manual já estão disponíveis em “Meus Ingressos”.</p>}
           <p className="mt-6 text-sm font-semibold text-slate-200">Total simulado: {formatMoney(result.payment.amountCents)}</p>
           <Link to={approved ? '/meus-ingressos' : '/minhas-reservas'} className="mt-8 inline-block rounded-xl bg-white px-5 py-3 font-semibold text-slate-950">{approved ? 'Abrir meus ingressos' : 'Voltar às reservas'}</Link>
         </div>

@@ -1,5 +1,12 @@
 export type TicketStatus = 'ACTIVE' | 'USED' | 'CANCELLED';
 
+export interface PendingTicketTransfer {
+  id: string;
+  status: 'PENDING';
+  createdAt: string;
+  recipient: { name: string; email: string };
+}
+
 export interface TicketDisplay {
   manualCode: string;
   status: TicketStatus;
@@ -19,6 +26,7 @@ export interface TicketDisplay {
   };
   ticketType: { id: string; name: string };
   customer: { name: string };
+  pendingTransfer?: PendingTicketTransfer | null;
 }
 
 export interface Ticket extends TicketDisplay {
@@ -33,4 +41,5 @@ export interface Ticket extends TicketDisplay {
   sharedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  pendingTransfer: PendingTicketTransfer | null;
 }

@@ -16,6 +16,7 @@ import { TicketTypesModule } from './ticket-types/ticket-types.module';
 import { PaymentsModule } from './payments/payments.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { GateModule } from './gate/gate.module';
+import { TicketTransfersModule } from './ticket-transfers/ticket-transfers.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { GateModule } from './gate/gate.module';
     PaymentsModule,
     TicketsModule,
     GateModule,
+    TicketTransfersModule,
   ],
   controllers: [AppController],
   providers: [

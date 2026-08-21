@@ -63,18 +63,27 @@ enum TicketValidationMethod {
   MANUAL
 }
 
+enum TicketTransferStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+  DECLINED
+}
+
 model User {
-  id              String                @id @default(uuid()) @db.Uuid
-  name            String
-  email           String                @unique
-  passwordHash    String                @map("password_hash")
-  role            Role                  @default(CUSTOMER)
-  createdAt       DateTime              @default(now()) @map("created_at")
-  updatedAt       DateTime              @updatedAt @map("updated_at")
-  events          Event[]
-  reservations    Reservation[]
-  tickets         Ticket[]
-  gateValidations TicketValidationLog[] @relation("GateUserValidations")
+  id                      String                @id @default(uuid()) @db.Uuid
+  name                    String
+  email                   String                @unique
+  passwordHash            String                @map("password_hash")
+  role                    Role                  @default(CUSTOMER)
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+  events                  Event[]
+  reservations            Reservation[]
+  tickets                 Ticket[]
+  gateValidations         TicketValidationLog[] @relation("GateUserValidations")
+  sentTicketTransfers     TicketTransfer[]      @relation("TicketTransferSender")
+  receivedTicketTransfers TicketTransfer[]      @relation("TicketTransferRecipient")
 
   @@map("users")
 }
@@ -202,6 +211,7 @@ model Ticket {
   reservationItem   ReservationItem       @relation(fields: [reservationItemId], references: [id], onDelete: Restrict)
   ticketType        TicketType            @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
   validationLogs    TicketValidationLog[]
+  transfers         TicketTransfer[]
 
   @@index([customerId, createdAt])
   @@index([eventId, status])
@@ -226,4 +236,23 @@ model TicketValidationLog {
   @@index([ticketId, createdAt])
   @@index([gateUserId, createdAt])
   @@map("ticket_validation_logs")
+}
+
+model TicketTransfer {
+  id          String               @id @default(uuid()) @db.Uuid
+  ticketId    String               @map("ticket_id") @db.Uuid
+  senderId    String               @map("sender_id") @db.Uuid
+  recipientId String               @map("recipient_id") @db.Uuid
+  status      TicketTransferStatus @default(PENDING)
+  resolvedAt  DateTime?            @map("resolved_at")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+  ticket      Ticket               @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  sender      User                 @relation("TicketTransferSender", fields: [senderId], references: [id], onDelete: Restrict)
+  recipient   User                 @relation("TicketTransferRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+
+  @@index([senderId, createdAt])
+  @@index([recipientId, status, createdAt])
+  @@index([ticketId, createdAt])
+  @@map("ticket_transfers")
 }

@@ -36,7 +36,7 @@ export function MyTicketsPage() {
               {ticket.event.posterUrl && <img src={ticket.event.posterUrl} alt="" className="h-full w-full object-cover opacity-70" />}
             </div>
             <div className="p-5">
-              <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-200">{ticket.status === 'ACTIVE' ? 'Ativo' : ticket.status === 'USED' ? 'Utilizado' : 'Cancelado'}</span>
+              <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-200">{ticket.pendingTransfer ? 'Transferência pendente' : ticket.status === 'ACTIVE' ? 'Ativo' : ticket.status === 'USED' ? 'Utilizado' : 'Cancelado'}</span>
               <h2 className="mt-4 text-xl font-semibold text-white">{ticket.event.title}</h2>
               <p className="mt-2 text-sm text-slate-300">{ticket.ticketType.name}</p>
               <p className="mt-2 text-sm text-slate-400">{formatEventDate(ticket.event.startDate)}</p>

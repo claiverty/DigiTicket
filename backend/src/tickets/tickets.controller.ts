@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
@@ -34,13 +35,19 @@ export class TicketsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Exibe um ingresso do cliente autenticado' })
-  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.ticketsService.findByCustomer(id, user.id);
   }
 
   @Post(':id/share')
   @ApiOperation({ summary: 'Gera ou substitui o link compartilhável' })
-  share(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  share(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.ticketsService.createShare(id, user.id);
   }
 
@@ -49,7 +56,7 @@ export class TicketsController {
   @ApiOperation({ summary: 'Revoga o link compartilhável do ingresso' })
   @ApiNoContentResponse({ description: 'Link revogado' })
   async revokeShare(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
     await this.ticketsService.revokeShare(id, user.id);

@@ -16,6 +16,7 @@ import { MyTicketsPage } from '../pages/my-tickets-page';
 import { TicketDetailsPage } from '../pages/ticket-details-page';
 import { SharedTicketPage } from '../pages/shared-ticket-page';
 import { GatePage } from '../pages/gate-page';
+import { TicketTransfersPage } from '../pages/ticket-transfers-page';
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
               { path: 'minhas-reservas', element: <MyReservationsPage /> },
               { path: 'checkout/:id', element: <CheckoutPage /> },
               { path: 'meus-ingressos', element: <MyTicketsPage /> },
+              { path: 'transferencias', element: <TicketTransfersPage /> },
               {
                 path: 'meus-ingressos/:id',
                 element: <TicketDetailsPage />,

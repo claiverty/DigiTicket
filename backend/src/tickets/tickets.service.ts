@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, TicketStatus } from '@prisma/client';
+import { Prisma, TicketStatus, TicketTransferStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TicketSecurityService } from './ticket-security.service';
 
@@ -46,16 +46,31 @@ export class TicketsService {
       );
     }
 
-    const updated = await this.prisma.ticket.update({
-      where: { id },
+    const updated = await this.prisma.ticket.updateMany({
+      where: {
+        id,
+        customerId,
+        status: TicketStatus.ACTIVE,
+        transfers: { none: { status: TicketTransferStatus.PENDING } },
+      },
       data: {
         shareToken: this.security.createShareToken(),
         sharedAt: new Date(),
       },
+    });
+
+    if (updated.count !== 1) {
+      throw new BadRequestException(
+        'Ingressos com transferência pendente não podem ser compartilhados.',
+      );
+    }
+
+    const ticketWithRelations = await this.prisma.ticket.findUniqueOrThrow({
+      where: { id },
       include: this.ticketInclude,
     });
 
-    return this.toResponse(updated);
+    return this.toResponse(ticketWithRelations);
   }
 
   async revokeShare(id: string, customerId: string) {
@@ -72,7 +87,7 @@ export class TicketsService {
       include: this.ticketInclude,
     });
 
-    if (!ticket || !ticket.shareToken) {
+    if (!ticket || !ticket.shareToken || ticket.transfers.length > 0) {
       throw new NotFoundException(
         'Link de ingresso inválido, revogado ou inexistente.',
       );
@@ -102,8 +117,11 @@ export class TicketsService {
   }
 
   private toResponse(ticket: TicketWithRelations) {
+    const { transfers, ...ticketData } = ticket;
+
     return {
-      ...ticket,
+      ...ticketData,
+      pendingTransfer: transfers[0] ?? null,
       qrToken: this.security.sign(ticket.ticketCode, ticket.eventId),
     };
   }
@@ -125,6 +143,16 @@ export class TicketsService {
     },
     ticketType: { select: { id: true, name: true } },
     customer: { select: { name: true } },
+    transfers: {
+      where: { status: TicketTransferStatus.PENDING },
+      take: 1,
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        recipient: { select: { name: true, email: true } },
+      },
+    },
   } satisfies Prisma.TicketInclude;
 }
 
@@ -146,5 +174,15 @@ type TicketWithRelations = Prisma.TicketGetPayload<{
     };
     ticketType: { select: { id: true; name: true } };
     customer: { select: { name: true } };
+    transfers: {
+      where: { status: 'PENDING' };
+      take: 1;
+      select: {
+        id: true;
+        status: true;
+        createdAt: true;
+        recipient: { select: { name: true; email: true } };
+      };
+    };
   };
 }>;

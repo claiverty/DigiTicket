@@ -3,6 +3,7 @@ import {
   EventStatus,
   Prisma,
   TicketStatus,
+  TicketTransferStatus,
   TicketValidationMethod,
   TicketValidationResult,
 } from '@prisma/client';
@@ -87,6 +88,17 @@ export class GateService {
         });
       }
 
+      if (ticket.transfers.length > 0) {
+        return this.recordResult(transaction, {
+          eventId,
+          gateUserId,
+          ticket,
+          method,
+          codeHash,
+          result: TicketValidationResult.INVALID,
+        });
+      }
+
       if (ticket.status === TicketStatus.USED) {
         return this.recordResult(transaction, {
           eventId,
@@ -111,7 +123,12 @@ export class GateService {
 
       const usedAt = new Date();
       const update = await transaction.ticket.updateMany({
-        where: { id: ticket.id, eventId, status: TicketStatus.ACTIVE },
+        where: {
+          id: ticket.id,
+          eventId,
+          status: TicketStatus.ACTIVE,
+          transfers: { none: { status: TicketTransferStatus.PENDING } },
+        },
         data: { status: TicketStatus.USED, usedAt },
       });
 
@@ -219,6 +236,11 @@ export class GateService {
     customer: { select: { name: true } },
     ticketType: { select: { name: true } },
     event: { select: { id: true, title: true } },
+    transfers: {
+      where: { status: TicketTransferStatus.PENDING },
+      select: { id: true },
+      take: 1,
+    },
   } satisfies Prisma.TicketInclude;
 }
 
@@ -234,6 +256,11 @@ type TicketWithRelations = Prisma.TicketGetPayload<{
     customer: { select: { name: true } };
     ticketType: { select: { name: true } };
     event: { select: { id: true; title: true } };
+    transfers: {
+      where: { status: 'PENDING' };
+      select: { id: true };
+      take: 1;
+    };
   };
 }>;
 
