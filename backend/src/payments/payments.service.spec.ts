@@ -30,15 +30,36 @@ describe('PaymentsService', () => {
     event: { saleMode: 'GENERAL_ADMISSION' as const },
   };
 
-  function createContext(statusUpdateCount = 1) {
+  function createContext(statusUpdateCount = 1, reservedSeating = false) {
+    const reservationForTest = reservedSeating
+      ? {
+          ...reservation,
+          event: { saleMode: 'RESERVED_SEATING' as const },
+          heldSeats: [
+            {
+              id: 'seat-a1',
+              ticketTypeId: reservation.items[0].ticketTypeId,
+              rowLabel: 'A',
+              seatNumber: 1,
+            },
+            {
+              id: 'seat-a2',
+              ticketTypeId: reservation.items[0].ticketTypeId,
+              rowLabel: 'A',
+              seatNumber: 2,
+            },
+          ],
+        }
+      : reservation;
     let createdTickets: Array<{
       customerId: string;
       reservationId: string;
       status: TicketStatus;
+      seatId?: string;
     }> = [];
     const transaction = {
       reservation: {
-        findFirst: jest.fn().mockResolvedValue(reservation),
+        findFirst: jest.fn().mockResolvedValue(reservationForTest),
         updateMany: jest.fn().mockResolvedValue({ count: statusUpdateCount }),
         findUniqueOrThrow: jest.fn().mockResolvedValue({
           ...reservation,
@@ -140,6 +161,21 @@ describe('PaymentsService', () => {
     expect(transaction.ticketType.update).toHaveBeenCalledWith({
       where: { id: reservation.items[0].ticketTypeId },
       data: { availableQuantity: { increment: 2 } },
+    });
+  });
+
+  it('vincula cada ingresso ao assento e confirma os lugares na aprovação', async () => {
+    const { service, transaction, getCreatedTickets } = createContext(1, true);
+
+    await service.simulate(reservationId, customerId, PaymentStatus.APPROVED);
+
+    expect(getCreatedTickets().map((ticket) => ticket.seatId)).toEqual([
+      'seat-a1',
+      'seat-a2',
+    ]);
+    expect(transaction.eventSeat.updateMany).toHaveBeenCalledWith({
+      where: { reservationId, status: 'HELD' },
+      data: { status: 'SOLD' },
     });
   });
 

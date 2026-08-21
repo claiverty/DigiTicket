@@ -153,7 +153,43 @@ describe('Aplicação (e2e)', () => {
         password: 'Senha123!',
         role: Role.ORGANIZER,
       })
-      .expect(400);
+      .expect(400)
+      .expect(({ body }) => {
+        const error = body as {
+          statusCode: number;
+          error: string;
+          message: string[];
+          path: string;
+          timestamp: string;
+        };
+        expect(error.statusCode).toBe(400);
+        expect(error.error).toBe('Bad Request');
+        expect(error.message).toContain('property role should not exist');
+        expect(error.path).toBe('/api/auth/register');
+        expect(Number.isNaN(Date.parse(error.timestamp))).toBe(false);
+      });
+  });
+
+  it('padroniza erros de autenticação sem expor detalhes internos', () => {
+    return request(app.getHttpServer())
+      .get('/api/auth/me')
+      .expect(401)
+      .expect(({ body }) => {
+        const error = body as {
+          statusCode: number;
+          error: string;
+          message: string;
+          path: string;
+        };
+        expect(error).toEqual(
+          expect.objectContaining({
+            statusCode: 401,
+            error: 'Unauthorized',
+            message: 'Unauthorized',
+            path: '/api/auth/me',
+          }),
+        );
+      });
   });
 
   it('expõe o catálogo e protege a gestão de eventos por papel', async () => {

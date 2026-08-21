@@ -1,5 +1,10 @@
 import { ConflictException } from '@nestjs/common';
-import { EventSaleMode, EventStatus, SeatStatus } from '@prisma/client';
+import {
+  EventSaleMode,
+  EventStatus,
+  SeatDisplaySize,
+  SeatStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SeatingService } from './seating.service';
 
@@ -82,5 +87,93 @@ describe('SeatingService', () => {
       service.createReservation(customerId, eventId, { seatIds: [seat.id] }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(transaction.ticketType.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('gera fileiras e assentos de um setor no servidor', async () => {
+    const createdSeats: Array<{ rowLabel: string; seatNumber: number }> = [];
+    const transaction = {
+      eventSeat: {
+        findMany: jest.fn().mockResolvedValue([]),
+        createMany: jest.fn(({ data }: { data: typeof createdSeats }) => {
+          createdSeats.push(...data);
+          return Promise.resolve({ count: data.length });
+        }),
+      },
+      ticketType: {
+        create: jest.fn().mockResolvedValue({ id: ticketTypeId }),
+      },
+    };
+    const prisma = {
+      event: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: eventId,
+          status: EventStatus.DRAFT,
+          saleMode: EventSaleMode.RESERVED_SEATING,
+        }),
+      },
+      $transaction: jest.fn(
+        (callback: (client: typeof transaction) => unknown) =>
+          callback(transaction),
+      ),
+    };
+    const service = new SeatingService(
+      prisma as unknown as PrismaService,
+      {} as never,
+    );
+
+    await service.createSection(eventId, 'organizer-id', {
+      name: 'VIP',
+      priceCents: 9000,
+      rows: 2,
+      seatsPerRow: 3,
+      seatDisplaySize: SeatDisplaySize.LARGE,
+    });
+
+    expect(createdSeats).toHaveLength(6);
+    expect(
+      createdSeats.map((item) => `${item.rowLabel}${item.seatNumber}`),
+    ).toEqual(['A1', 'A2', 'A3', 'B1', 'B2', 'B3']);
+    expect(transaction.ticketType.create).toHaveBeenCalledWith({
+      data: {
+        eventId,
+        name: 'VIP',
+        priceCents: 9000,
+        capacity: 6,
+        availableQuantity: 6,
+        seatDisplaySize: SeatDisplaySize.LARGE,
+      },
+    });
+  });
+
+  it('permite alterar o tamanho visual somente em setor próprio', async () => {
+    const prisma = {
+      event: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: eventId,
+          status: EventStatus.DRAFT,
+          saleMode: EventSaleMode.RESERVED_SEATING,
+        }),
+      },
+      ticketType: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        findUniqueOrThrow: jest.fn().mockResolvedValue({
+          id: ticketTypeId,
+          seatDisplaySize: SeatDisplaySize.LARGE,
+        }),
+      },
+    };
+    const service = new SeatingService(
+      prisma as unknown as PrismaService,
+      {} as never,
+    );
+
+    await service.updateSection(eventId, ticketTypeId, 'organizer-id', {
+      seatDisplaySize: SeatDisplaySize.LARGE,
+    });
+
+    expect(prisma.ticketType.updateMany).toHaveBeenCalledWith({
+      where: { id: ticketTypeId, eventId },
+      data: { seatDisplaySize: SeatDisplaySize.LARGE },
+    });
   });
 });

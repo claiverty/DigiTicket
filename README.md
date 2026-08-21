@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 9 — mapa simples e reserva de assentos implementados.
+> Status atual: Fase 10.1 — testes críticos e respostas de erro padronizadas.
 
 ## Sobre
 
@@ -481,6 +481,24 @@ npm run seed
 
 O frontend continuará sem acessar o Supabase diretamente. Toda comunicação permanece no fluxo `Frontend → NestJS → Prisma → PostgreSQL`.
 
+## Qualidade e tratamento de erros
+
+Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação.
+
+Erros HTTP usam uma resposta consistente, permitindo que o frontend apresente mensagens úteis sem depender de formatos diferentes entre módulos:
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": ["mensagem de validação"],
+  "path": "/api/recurso",
+  "timestamp": "2026-08-21T18:00:00.000Z"
+}
+```
+
+Erros inesperados são registrados no backend, mas seus detalhes internos não são enviados ao cliente.
+
 ## Verificação
 
 Frontend:
@@ -506,8 +524,9 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
-2. Editor visual avançado para plantas irregulares e múltiplos corredores.
+1. Loading states, skeletons e estados vazios.
+2. Responsividade, acessibilidade e refinamentos de experiência.
+3. Editor visual avançado para plantas irregulares e múltiplos corredores.
 
 ## Limitações atuais
 
