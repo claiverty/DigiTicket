@@ -62,12 +62,20 @@ export function OrganizerDashboardPage() {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">Seus eventos</h1>
           <p className="mt-3 text-slate-400">Crie, publique e acompanhe o estado dos seus eventos.</p>
         </div>
-        <Link
-          to="/organizador/eventos/novo"
-          className="rounded-xl bg-emerald-400 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-300"
-        >
-          Criar evento
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/organizador/importar-eventos"
+            className="rounded-xl border border-white/15 px-5 py-3 text-center font-semibold text-slate-100 hover:border-emerald-300/40"
+          >
+            Importar evento
+          </Link>
+          <Link
+            to="/organizador/eventos/novo"
+            className="rounded-xl bg-emerald-400 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-300"
+          >
+            Criar evento
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">

@@ -8,5 +8,6 @@ import { ReservationsModule } from '../reservations/reservations.module';
   imports: [ReservationsModule],
   controllers: [PublicEventsController, OrganizerEventsController],
   providers: [EventsService],
+  exports: [EventsService],
 })
 export class EventsModule {}

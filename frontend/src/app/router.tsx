@@ -17,6 +17,7 @@ import { TicketDetailsPage } from '../pages/ticket-details-page';
 import { SharedTicketPage } from '../pages/shared-ticket-page';
 import { GatePage } from '../pages/gate-page';
 import { TicketTransfersPage } from '../pages/ticket-transfers-page';
+import { ExternalEventsPage } from '../pages/external-events-page';
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
             element: <RoleRoute allowedRoles={['ORGANIZER']} />,
             children: [
               { path: 'organizador', element: <OrganizerDashboardPage /> },
+              {
+                path: 'organizador/importar-eventos',
+                element: <ExternalEventsPage />,
+              },
               { path: 'organizador/eventos/novo', element: <EventFormPage /> },
               {
                 path: 'organizador/eventos/:id/editar',

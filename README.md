@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 7.1 — transferência segura de ingressos entre contas implementada.
+> Status atual: Fase 8 — pesquisa e importação de eventos externos implementadas.
 
 ## Sobre
 
@@ -92,6 +92,12 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Troca transacional de titularidade com novos QR e código manual.
 - Bloqueio do ingresso na portaria enquanto a transferência aguarda decisão.
 - Histórico de transferências recebidas e enviadas.
+- Pesquisa de eventos realizados no Brasil pela Ticketmaster Discovery API.
+- Importação de eventos externos como rascunhos editáveis do DigiTicket.
+- Normalização de categoria, datas, local, endereço e imagem no backend.
+- Enriquecimento automático da descrição com conteúdo editorial da Ticketmaster Brasil.
+- Proteção contra importação duplicada do mesmo evento externo.
+- Tratamento de credencial ausente ou recusada, limite de uso e indisponibilidade externa.
 
 ## Autenticação
 
@@ -292,6 +298,29 @@ O aceite altera o `customerId`, o código interno, o código manual e o QR assin
 6. Confirme que a conta anterior não consegue mais abrir o ingresso.
 7. Repita com outro ingresso para testar a recusa e o cancelamento.
 
+## Importação de eventos externos
+
+A integração usa a Ticketmaster somente como fonte de dados. A pesquisa e todo o fluxo de gestão permanecem dentro da interface do DigiTicket, preservando a identidade visual e as regras da plataforma.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/integrations/ticketmaster/events` | Organizador | Pesquisa eventos no Brasil por palavra-chave e cidade. |
+| `POST` | `/api/integrations/ticketmaster/events/:externalId/import` | Organizador | Importa os dados do evento como rascunho. |
+
+A chave `TICKETMASTER_API_KEY` fica exclusivamente no backend. Ela pode ser obtida no [portal de desenvolvedores da Ticketmaster](https://developer.ticketmaster.com/) e não deve ser enviada ao frontend nem versionada no Git.
+
+Durante a importação, categoria, datas, imagem e endereço são adaptados ao modelo do DigiTicket. Se a Discovery API não enviar uma descrição, o backend procura um trecho editorial na página geral da atração na Ticketmaster Brasil, remove informações comerciais e registra a URL da fonte. Se a página não estiver disponível, o DigiTicket cria um texto factual com título, categoria, data, horário, cidade e local. Quando a fonte não informa uma data de término válida, o sistema assume três horas após o início. O rascunho utiliza entrada geral e ainda precisa receber tipos de ingresso antes de ser publicado pelo organizador.
+
+### Como testar a importação
+
+1. Configure `TICKETMASTER_API_KEY` no arquivo local `backend/.env` e reinicie o backend.
+2. Entre como `organizador@demo.com`.
+3. No painel, clique em `Importar evento`.
+4. Pesquise um artista, festival ou espetáculo e, se desejar, informe uma cidade.
+5. Clique em `Importar rascunho` em um resultado com data confirmada.
+6. Abra `Revisar evento`, confira os dados importados e salve os ajustes.
+7. Cadastre pelo menos um tipo de ingresso antes de publicar.
+
 ## Arquitetura atual
 
 ```mermaid
@@ -452,9 +481,8 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Integração para pesquisa e importação de eventos externos.
-2. Mapa simples de assentos reservados.
-3. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Mapa simples de assentos reservados.
+2. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
 
 ## Limitações atuais
 
@@ -463,3 +491,6 @@ As próximas funcionalidades serão adicionadas e documentadas por fase:
 - Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.
+- A pesquisa externa depende da disponibilidade, dos dados e dos limites de uso da Ticketmaster Discovery API.
+- O enriquecimento editorial é uma leitura de melhor esforço da página pública da Ticketmaster Brasil e usa o texto factual automático caso a estrutura do site mude.
+- Dados importados precisam ser revisados pelo organizador antes da publicação.

@@ -1,14 +1,35 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EventSaleMode, EventStatus, Prisma } from '@prisma/client';
+import {
+  EventCategory,
+  EventSaleMode,
+  EventStatus,
+  Prisma,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReservationsService } from '../reservations/reservations.service';
 import type { CreateEventDto } from './dto/create-event.dto';
 import type { ListEventsQueryDto } from './dto/list-events-query.dto';
 import type { UpdateEventDto } from './dto/update-event.dto';
+
+interface ExternalEventDraftInput {
+  title: string;
+  description: string;
+  category: EventCategory;
+  venueName: string;
+  address: string;
+  city: string;
+  state: string;
+  startDate: Date;
+  endDate: Date;
+  posterUrl: string | null;
+  externalSource: string;
+  externalId: string;
+}
 
 @Injectable()
 export class EventsService {
@@ -96,6 +117,81 @@ export class EventsService {
         status: EventStatus.DRAFT,
       },
     });
+  }
+
+  async findImportedExternalIds(
+    externalSource: string,
+    externalIds: string[],
+  ): Promise<string[]> {
+    if (externalIds.length === 0) return [];
+
+    const events = await this.prisma.event.findMany({
+      where: {
+        externalSource,
+        externalId: { in: externalIds },
+      },
+      select: { externalId: true },
+    });
+
+    return events.flatMap((event) =>
+      event.externalId ? [event.externalId] : [],
+    );
+  }
+
+  async createExternalDraft(
+    organizerId: string,
+    input: ExternalEventDraftInput,
+  ) {
+    this.validateDates(
+      input.startDate.toISOString(),
+      input.endDate.toISOString(),
+    );
+
+    const existing = await this.prisma.event.findFirst({
+      where: {
+        externalSource: input.externalSource,
+        externalId: input.externalId,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      throw new ConflictException('Este evento externo já foi importado.');
+    }
+
+    const slug = await this.createAvailableSlug(input.title);
+
+    try {
+      return await this.prisma.event.create({
+        data: {
+          organizerId,
+          title: input.title.trim(),
+          slug,
+          description: input.description.trim(),
+          category: input.category,
+          saleMode: EventSaleMode.GENERAL_ADMISSION,
+          venueName: input.venueName.trim(),
+          address: input.address.trim(),
+          city: input.city.trim(),
+          state: input.state,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          posterUrl: input.posterUrl,
+          status: EventStatus.DRAFT,
+          externalSource: input.externalSource,
+          externalId: input.externalId,
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Este evento externo já foi importado.');
+      }
+
+      throw error;
+    }
   }
 
   async update(id: string, organizerId: string, input: UpdateEventDto) {

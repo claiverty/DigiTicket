@@ -1,4 +1,8 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventCategory, EventSaleMode, EventStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from './events.service';
@@ -111,6 +115,69 @@ describe('EventsService', () => {
         status: EventStatus.DRAFT,
       },
     });
+  });
+
+  it('importa evento externo como rascunho sem duplicar a origem', async () => {
+    eventMock.findFirst.mockResolvedValue(null);
+    eventMock.findUnique.mockResolvedValue(null);
+    eventMock.create.mockResolvedValue(event);
+
+    await service.createExternalDraft(organizerId, {
+      title: 'Festival externo',
+      description: 'Descrição importada.',
+      category: EventCategory.SHOW,
+      venueName: 'Arena Demo',
+      address: 'Avenida Central, 100',
+      city: 'São Paulo',
+      state: 'SP',
+      startDate,
+      endDate,
+      posterUrl: null,
+      externalSource: 'TICKETMASTER',
+      externalId: 'externo-1',
+    });
+
+    expect(eventMock.create).toHaveBeenCalledWith({
+      data: {
+        organizerId,
+        title: 'Festival externo',
+        slug: 'festival-externo',
+        description: 'Descrição importada.',
+        category: EventCategory.SHOW,
+        status: EventStatus.DRAFT,
+        saleMode: EventSaleMode.GENERAL_ADMISSION,
+        venueName: 'Arena Demo',
+        address: 'Avenida Central, 100',
+        city: 'São Paulo',
+        state: 'SP',
+        startDate,
+        endDate,
+        posterUrl: null,
+        externalSource: 'TICKETMASTER',
+        externalId: 'externo-1',
+      },
+    });
+  });
+
+  it('rejeita a importação repetida do mesmo evento externo', async () => {
+    eventMock.findFirst.mockResolvedValue({ id: eventId });
+
+    await expect(
+      service.createExternalDraft(organizerId, {
+        title: 'Festival externo',
+        description: 'Descrição importada.',
+        category: EventCategory.SHOW,
+        venueName: 'Arena Demo',
+        address: 'Avenida Central, 100',
+        city: 'São Paulo',
+        state: 'SP',
+        startDate,
+        endDate,
+        posterUrl: null,
+        externalSource: 'TICKETMASTER',
+        externalId: 'externo-1',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('não revela nem altera evento pertencente a outro organizador', async () => {
