@@ -25,6 +25,7 @@ export function TicketView({ ticket }: { ticket: TicketDisplay }) {
           <dl className="grid gap-5 sm:grid-cols-2">
             <TicketData label="Titular" value={ticket.customer.name} />
             <TicketData label="Tipo" value={ticket.ticketType.name} />
+            {ticket.seat && <TicketData label="Assento" value={`${ticket.seat.rowLabel}${ticket.seat.seatNumber}`} />}
             <TicketData label="Data" value={formatEventDate(ticket.event.startDate)} />
             <TicketData label="Local" value={`${ticket.event.venueName} · ${ticket.event.city}/${ticket.event.state}`} />
           </dl>

@@ -18,6 +18,7 @@ import { SharedTicketPage } from '../pages/shared-ticket-page';
 import { GatePage } from '../pages/gate-page';
 import { TicketTransfersPage } from '../pages/ticket-transfers-page';
 import { ExternalEventsPage } from '../pages/external-events-page';
+import { SeatMapPage } from '../pages/seat-map-page';
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +65,10 @@ export const router = createBrowserRouter([
               {
                 path: 'organizador/eventos/:id/ingressos',
                 element: <TicketTypesPage />,
+              },
+              {
+                path: 'organizador/eventos/:id/assentos',
+                element: <SeatMapPage />,
               },
             ],
           },

@@ -8,6 +8,7 @@ import {
   PaymentStatus,
   Prisma,
   ReservationStatus,
+  SeatStatus,
   TicketStatus,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -35,7 +36,11 @@ export class PaymentsService {
     return this.prisma.$transaction(async (transaction) => {
       const reservation = await transaction.reservation.findFirst({
         where: { id: reservationId, customerId },
-        include: { items: true },
+        include: {
+          items: true,
+          event: { select: { saleMode: true } },
+          heldSeats: { orderBy: [{ rowLabel: 'asc' }, { seatNumber: 'asc' }] },
+        },
       });
 
       if (!reservation) {
@@ -59,6 +64,19 @@ export class PaymentsService {
         (total, item) => total + item.unitPriceCents * item.quantity,
         0,
       );
+      const reservedQuantity = reservation.items.reduce(
+        (total, item) => total + item.quantity,
+        0,
+      );
+
+      if (
+        reservation.event.saleMode === 'RESERVED_SEATING' &&
+        reservation.heldSeats.length !== reservedQuantity
+      ) {
+        throw new ConflictException(
+          'Os assentos da reserva estão inconsistentes. O pagamento foi interrompido.',
+        );
+      }
 
       if (calculatedTotal !== reservation.totalCents) {
         throw new ConflictException(
@@ -100,8 +118,19 @@ export class PaymentsService {
       if (outcome === PaymentStatus.APPROVED) {
         const tickets: Prisma.TicketCreateManyInput[] = [];
 
+        const seatsByTicketType = new Map<
+          string,
+          typeof reservation.heldSeats
+        >();
+        for (const seat of reservation.heldSeats) {
+          const seats = seatsByTicketType.get(seat.ticketTypeId) ?? [];
+          seats.push(seat);
+          seatsByTicketType.set(seat.ticketTypeId, seats);
+        }
+
         for (const item of reservation.items) {
           for (let unit = 0; unit < item.quantity; unit += 1) {
+            const seat = seatsByTicketType.get(item.ticketTypeId)?.[unit];
             tickets.push({
               eventId: reservation.eventId,
               customerId,
@@ -111,14 +140,23 @@ export class PaymentsService {
               status: TicketStatus.ACTIVE,
               ticketCode: this.ticketSecurity.createTicketCode(),
               manualCode: this.ticketSecurity.createManualCode(),
+              seatId: seat?.id,
             });
           }
         }
 
         const created = await transaction.ticket.createMany({ data: tickets });
         ticketsCreated = created.count;
+        await transaction.eventSeat.updateMany({
+          where: { reservationId, status: SeatStatus.HELD },
+          data: { status: SeatStatus.SOLD },
+        });
       } else {
         await this.restoreInventory(transaction, reservation.items);
+        await transaction.eventSeat.updateMany({
+          where: { reservationId, status: SeatStatus.HELD },
+          data: { reservationId: null, status: SeatStatus.AVAILABLE },
+        });
       }
 
       const updatedReservation =
@@ -143,6 +181,15 @@ export class PaymentsService {
               },
             },
             payment: true,
+            heldSeats: {
+              select: {
+                id: true,
+                rowLabel: true,
+                seatNumber: true,
+                ticketTypeId: true,
+              },
+              orderBy: [{ rowLabel: 'asc' }, { seatNumber: 'asc' }],
+            },
             _count: { select: { tickets: true } },
           },
         });

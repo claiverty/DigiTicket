@@ -26,6 +26,8 @@ describe('PaymentsService', () => {
         createdAt: new Date(),
       },
     ],
+    heldSeats: [],
+    event: { saleMode: 'GENERAL_ADMISSION' as const },
   };
 
   function createContext(statusUpdateCount = 1) {
@@ -72,6 +74,7 @@ describe('PaymentsService', () => {
         ),
       },
       ticketType: { update: jest.fn() },
+      eventSeat: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
     };
     const prisma = {
       $transaction: jest.fn(

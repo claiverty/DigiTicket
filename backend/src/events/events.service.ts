@@ -203,6 +203,17 @@ export class EventsService {
       );
     }
 
+    if (input.saleMode && input.saleMode !== event.saleMode) {
+      const configuredInventory = await this.prisma.ticketType.count({
+        where: { eventId: id },
+      });
+      if (configuredInventory > 0) {
+        throw new BadRequestException(
+          'Remova os ingressos ou setores configurados antes de alterar o modo de venda.',
+        );
+      }
+    }
+
     const startDate = input.startDate ?? event.startDate.toISOString();
     const endDate = input.endDate ?? event.endDate.toISOString();
     this.validateDates(startDate, endDate);
@@ -241,19 +252,15 @@ export class EventsService {
       return event;
     }
 
-    if (event.saleMode === EventSaleMode.RESERVED_SEATING) {
-      throw new BadRequestException(
-        'A publicação com assentos reservados estará disponível na fase de mapa de assentos.',
-      );
-    }
-
     const ticketTypeCount = await this.prisma.ticketType.count({
       where: { eventId: id },
     });
 
     if (ticketTypeCount === 0) {
       throw new BadRequestException(
-        'Cadastre pelo menos um tipo de ingresso antes de publicar o evento.',
+        event.saleMode === EventSaleMode.RESERVED_SEATING
+          ? 'Configure pelo menos um setor de assentos antes de publicar o evento.'
+          : 'Cadastre pelo menos um tipo de ingresso antes de publicar o evento.',
       );
     }
 

@@ -49,6 +49,7 @@ describe('ReservationsService', () => {
         findUniqueOrThrow: jest.fn(),
       },
       reservationItem: { findMany: jest.fn() },
+      eventSeat: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
     };
     const prisma = {
       reservation: { findMany: jest.fn().mockResolvedValue([]) },

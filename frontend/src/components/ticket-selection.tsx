@@ -6,6 +6,7 @@ import { ApiError } from '../services/api';
 import { createReservation } from '../services/reservation-service';
 import type { Event, TicketType } from '../types/event';
 import { formatMoney } from '../utils/event-formatters';
+import { SeatSelection } from './seat-selection';
 
 export function TicketSelection({ event }: { event: Event }) {
   const { user, token } = useAuth();
@@ -56,7 +57,7 @@ export function TicketSelection({ event }: { event: Event }) {
   };
 
   if (event.saleMode !== 'GENERAL_ADMISSION') {
-    return <div className="mt-6 rounded-xl bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">A seleção de assentos será disponibilizada na fase de mapa de assentos.</div>;
+    return <SeatSelection event={event} />;
   }
 
   if (ticketTypes.length === 0) {

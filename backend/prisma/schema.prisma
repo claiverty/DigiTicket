@@ -70,6 +70,17 @@ enum TicketTransferStatus {
   DECLINED
 }
 
+enum SeatStatus {
+  AVAILABLE
+  HELD
+  SOLD
+}
+
+enum SeatDisplaySize {
+  STANDARD
+  LARGE
+}
+
 model User {
   id                      String                @id @default(uuid()) @db.Uuid
   name                    String
@@ -113,6 +124,7 @@ model Event {
   reservations   Reservation[]
   tickets        Ticket[]
   validationLogs TicketValidationLog[]
+  seats          EventSeat[]
 
   @@unique([externalSource, externalId])
   @@index([organizerId, status])
@@ -129,11 +141,13 @@ model TicketType {
   priceCents        Int               @map("price_cents")
   capacity          Int
   availableQuantity Int               @map("available_quantity")
+  seatDisplaySize   SeatDisplaySize   @default(STANDARD) @map("seat_display_size")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   event             Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
   reservationItems  ReservationItem[]
   tickets           Ticket[]
+  seats             EventSeat[]
 
   @@unique([eventId, name])
   @@index([eventId])
@@ -154,6 +168,7 @@ model Reservation {
   items      ReservationItem[]
   payment    Payment?
   tickets    Ticket[]
+  heldSeats  EventSeat[]
 
   @@index([customerId, createdAt])
   @@index([status, expiresAt])
@@ -210,6 +225,8 @@ model Ticket {
   reservation       Reservation           @relation(fields: [reservationId], references: [id], onDelete: Restrict)
   reservationItem   ReservationItem       @relation(fields: [reservationItemId], references: [id], onDelete: Restrict)
   ticketType        TicketType            @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  seatId            String?               @unique @map("seat_id") @db.Uuid
+  seat              EventSeat?            @relation(fields: [seatId], references: [id], onDelete: Restrict)
   validationLogs    TicketValidationLog[]
   transfers         TicketTransfer[]
 
@@ -217,6 +234,28 @@ model Ticket {
   @@index([eventId, status])
   @@index([reservationId])
   @@map("tickets")
+}
+
+model EventSeat {
+  id            String       @id @default(uuid()) @db.Uuid
+  eventId       String       @map("event_id") @db.Uuid
+  ticketTypeId  String       @map("ticket_type_id") @db.Uuid
+  reservationId String?      @map("reservation_id") @db.Uuid
+  rowLabel      String       @map("row_label")
+  seatNumber    Int          @map("seat_number")
+  status        SeatStatus   @default(AVAILABLE)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType    TicketType   @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  ticket        Ticket?
+
+  @@unique([eventId, rowLabel, seatNumber])
+  @@index([eventId, status])
+  @@index([ticketTypeId])
+  @@index([reservationId])
+  @@map("event_seats")
 }
 
 model TicketValidationLog {

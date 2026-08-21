@@ -100,6 +100,7 @@ export class TicketsService {
       qrToken: this.security.sign(ticket.ticketCode, ticket.eventId),
       event: ticket.event,
       ticketType: ticket.ticketType,
+      seat: ticket.seat,
       customer: ticket.customer,
     };
   }
@@ -142,6 +143,7 @@ export class TicketsService {
       },
     },
     ticketType: { select: { id: true, name: true } },
+    seat: { select: { rowLabel: true, seatNumber: true } },
     customer: { select: { name: true } },
     transfers: {
       where: { status: TicketTransferStatus.PENDING },
@@ -173,6 +175,7 @@ type TicketWithRelations = Prisma.TicketGetPayload<{
       };
     };
     ticketType: { select: { id: true; name: true } };
+    seat: { select: { rowLabel: true; seatNumber: true } };
     customer: { select: { name: true } };
     transfers: {
       where: { status: 'PENDING' };

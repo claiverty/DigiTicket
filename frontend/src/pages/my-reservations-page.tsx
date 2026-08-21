@@ -113,6 +113,11 @@ function ReservationCard({
           <ul className="mt-5 space-y-2 text-sm text-slate-300">
             {reservation.items.map((item) => <li key={item.id}>{item.quantity}× {item.ticketType.name} — {formatMoney(item.unitPriceCents)} cada</li>)}
           </ul>
+          {reservation.heldSeats.length > 0 && (
+            <p className="mt-3 text-sm text-amber-100">
+              Assentos: {reservation.heldSeats.map((seat) => `${seat.rowLabel}${seat.seatNumber}`).join(', ')}
+            </p>
+          )}
           {isPending && (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5">
               <p className="font-mono text-sm text-amber-200">Expira em {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>

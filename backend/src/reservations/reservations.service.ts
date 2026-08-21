@@ -9,6 +9,7 @@ import {
   EventStatus,
   Prisma,
   ReservationStatus,
+  SeatStatus,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateReservationDto } from './dto/create-reservation.dto';
@@ -167,6 +168,7 @@ export class ReservationsService {
       }
 
       await this.restoreInventory(transaction, reservation.items);
+      await this.releaseSeats(transaction, id);
       return transaction.reservation.findUniqueOrThrow({
         where: { id },
         include: this.reservationInclude,
@@ -205,6 +207,7 @@ export class ReservationsService {
           where: { reservationId: reservation.id },
         });
         await this.restoreInventory(transaction, items);
+        await this.releaseSeats(transaction, reservation.id);
         return true;
       });
 
@@ -226,6 +229,16 @@ export class ReservationsService {
     }
   }
 
+  private async releaseSeats(
+    transaction: Prisma.TransactionClient,
+    reservationId: string,
+  ) {
+    await transaction.eventSeat.updateMany({
+      where: { reservationId, status: SeatStatus.HELD },
+      data: { reservationId: null, status: SeatStatus.AVAILABLE },
+    });
+  }
+
   private readonly reservationInclude = {
     event: {
       select: {
@@ -245,6 +258,15 @@ export class ReservationsService {
       },
     },
     payment: true,
+    heldSeats: {
+      select: {
+        id: true,
+        rowLabel: true,
+        seatNumber: true,
+        ticketTypeId: true,
+      },
+      orderBy: [{ rowLabel: 'asc' }, { seatNumber: 'asc' }],
+    },
     _count: { select: { tickets: true } },
   } satisfies Prisma.ReservationInclude;
 }

@@ -106,6 +106,11 @@ export function CheckoutPage() {
                 </li>
               ))}
             </ul>
+            {reservation.heldSeats.length > 0 && (
+              <p className="mt-5 rounded-xl bg-amber-300/10 p-3 text-sm text-amber-100">
+                Assentos: {reservation.heldSeats.map((seat) => `${seat.rowLabel}${seat.seatNumber}`).join(', ')}
+              </p>
+            )}
             <div className="mt-6 flex justify-between border-t border-white/10 pt-5 text-lg font-semibold">
               <span>Total</span>
               <span className="text-emerald-300">{formatMoney(reservation.totalCents)}</span>

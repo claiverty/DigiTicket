@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 8 — pesquisa e importação de eventos externos implementadas.
+> Status atual: Fase 9 — mapa simples e reserva de assentos implementados.
 
 ## Sobre
 
@@ -133,7 +133,7 @@ Somente eventos com status `PUBLISHED` aparecem no catálogo. Eventos novos semp
 
 O seed inclui `Festival Luzes da Cidade`, publicado no catálogo, e `Mostra de Cinema Brasileiro`, mantido como rascunho no dashboard do organizador.
 
-O festival possui os tipos de ingresso `Pista` e `Pista Premium`. Um evento de entrada geral precisa ter pelo menos um tipo de ingresso antes de ser publicado. Eventos com assentos reservados serão liberados somente quando o mapa de assentos estiver implementado.
+O festival possui os tipos de ingresso `Pista` e `Pista Premium`. Um evento de entrada geral precisa ter pelo menos um tipo de ingresso antes de ser publicado. Eventos com assentos reservados precisam ter pelo menos um setor configurado.
 
 ## Estoque e reservas
 
@@ -321,6 +321,31 @@ Durante a importação, categoria, datas, imagem e endereço são adaptados ao m
 6. Abra `Revisar evento`, confira os dados importados e salve os ajustes.
 7. Cadastre pelo menos um tipo de ingresso antes de publicar.
 
+## Mapa de assentos
+
+O mapa aparece somente em eventos com modo de venda `RESERVED_SEATING`. O organizador cria setores informando nome, preço, quantidade de fileiras, assentos por fileira e tamanho visual padrão ou confortável/VIP; o DigiTicket gera automaticamente identificações como `A1`, `A2` e `B1`. Os setores são separados no mapa, e o tamanho visual pode ser alterado enquanto o evento está em rascunho.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/organizer/events/:eventId/seat-sections` | Organizador proprietário | Exibe o mapa durante a configuração. |
+| `POST` | `/api/organizer/events/:eventId/seat-sections` | Organizador proprietário | Cria um setor e gera seus assentos. |
+| `PATCH` | `/api/organizer/events/:eventId/seat-sections/:ticketTypeId` | Organizador proprietário | Altera o tamanho visual dos assentos do setor. |
+| `DELETE` | `/api/organizer/events/:eventId/seat-sections/:ticketTypeId` | Organizador proprietário | Exclui um setor enquanto o evento é rascunho. |
+| `GET` | `/api/events/:eventId/seats` | Público | Exibe os lugares e estados do mapa publicado. |
+| `POST` | `/api/reservations/events/:eventId/seats` | Cliente | Bloqueia até dez assentos por 10 minutos. |
+
+Um assento começa como `AVAILABLE`, passa para `HELD` durante a reserva e vira `SOLD` somente quando o pagamento é aprovado. Cancelamento, expiração ou pagamento recusado devolvem o assento ao estado disponível. A alteração condicional dentro da transação garante que apenas um cliente consiga vencer a disputa pelo mesmo lugar.
+
+### Como testar o mapa de assentos
+
+1. Entre como organizador e crie um evento no modo `Assentos reservados`.
+2. No painel, abra `Configurar assentos` e adicione um ou mais setores.
+3. Publique o evento e abra sua página no catálogo.
+4. Entre como cliente, selecione os lugares desejados e crie a reserva.
+5. Confira os códigos dos assentos em `Minhas reservas` e no checkout.
+6. Simule a aprovação e confirme que os lugares ficam indisponíveis e aparecem nos ingressos.
+7. Crie outra reserva e cancele ou aguarde a expiração para confirmar que os assentos retornam ao mapa.
+
 ## Arquitetura atual
 
 ```mermaid
@@ -434,7 +459,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança, validação e transferência dos ingressos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança, validação, transferência e mapa de assentos, além do seed atual, já foram aplicadas.
 
 Para configurar outro ambiente:
 
@@ -481,14 +506,14 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Mapa simples de assentos reservados.
-2. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+1. Testes adicionais, acessibilidade, responsividade e refinamentos de experiência.
+2. Editor visual avançado para plantas irregulares e múltiplos corredores.
 
 ## Limitações atuais
 
 - Pagamentos são inteiramente simulados e não realizam cobrança financeira.
 - A transferência é gratuita e não inclui anúncio, preço ou revenda entre usuários.
-- Eventos com `RESERVED_SEATING` ainda não podem ser publicados; o grid de assentos pertence a uma fase posterior.
+- O mapa atual usa um grid simples; ele não representa plantas irregulares, mesas ou corredores personalizados.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.
 - A pesquisa externa depende da disponibilidade, dos dados e dos limites de uso da Ticketmaster Discovery API.

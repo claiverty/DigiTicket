@@ -18,6 +18,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { GateModule } from './gate/gate.module';
 import { TicketTransfersModule } from './ticket-transfers/ticket-transfers.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { SeatingModule } from './seating/seating.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     GateModule,
     TicketTransfersModule,
     IntegrationsModule,
+    SeatingModule,
   ],
   controllers: [AppController],
   providers: [

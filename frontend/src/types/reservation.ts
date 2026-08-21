@@ -37,6 +37,12 @@ export interface Reservation {
     startDate: string;
   };
   items: ReservationItem[];
+  heldSeats: Array<{
+    id: string;
+    rowLabel: string;
+    seatNumber: number;
+    ticketTypeId: string;
+  }>;
   payment: Payment | null;
   _count: { tickets: number };
 }

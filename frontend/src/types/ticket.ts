@@ -25,6 +25,7 @@ export interface TicketDisplay {
     endDate: string;
   };
   ticketType: { id: string; name: string };
+  seat: { rowLabel: string; seatNumber: number } | null;
   customer: { name: string };
   pendingTransfer?: PendingTicketTransfer | null;
 }
