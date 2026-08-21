@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   CalendarDays,
   ChevronDown,
   CircleHelp,
@@ -66,7 +67,6 @@ export function AppLayout() {
 
           <nav className="ml-7 hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
             <Link className="rounded-full px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950" to="/#eventos">Eventos</Link>
-            <Link className="rounded-full px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950" to="/organizador">Organizar</Link>
           </nav>
 
           <form onSubmit={submitSearch} className="relative ml-auto hidden w-full max-w-md md:block">
@@ -101,7 +101,7 @@ export function AppLayout() {
             </button>
 
             {menuOpen && (
-              <div role="menu" className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-25px_rgba(15,23,42,0.35)]">
+              <div role="menu" className="fixed right-4 top-[4.75rem] z-[60] max-h-[calc(100dvh-5.5rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-25px_rgba(15,23,42,0.35)] md:absolute md:right-0 md:top-[calc(100%+0.75rem)] md:max-h-[calc(100dvh-6rem)]">
                 <div className="bg-blue-600 px-5 py-5 text-white">
                   <div className="flex items-center gap-3">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15"><UserRound size={21} /></span>
@@ -119,7 +119,7 @@ export function AppLayout() {
                       <Icon size={18} className="text-slate-400" /> {label}
                     </Link>
                   ))}
-                  <Link role="menuitem" to="/" onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
+                  <Link role="menuitem" to="/#eventos" onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
                     <CircleHelp size={18} className="text-slate-400" /> Explorar eventos
                   </Link>
                 </div>
@@ -176,7 +176,7 @@ function getMenuLinks(role?: string): MenuLink[] {
   return [
     { label: 'Meus ingressos', to: '/meus-ingressos', icon: Ticket },
     { label: 'Minhas reservas', to: '/minhas-reservas', icon: CalendarDays },
-    { label: 'Transferências', to: '/transferencias', icon: UserRound },
+    { label: 'Transferências', to: '/transferencias', icon: ArrowLeftRight },
     { label: 'Meu perfil', to: '/perfil', icon: UserRound },
   ];
 }

@@ -58,7 +58,8 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Dashboard inicial do organizador com métricas e gestão de eventos.
 - Seed com um evento publicado e um rascunho de demonstração.
 - Tipos de ingresso por quantidade com preço inteiro em centavos.
-- Gestão de capacidade e disponibilidade pelo organizador.
+- Modelos rápidos de ingresso com valores de inteira e meia-entrada por setor, além de lote promocional.
+- Gestão de capacidade e disponibilidade pelo organizador, com visualização agrupada por setor.
 - Preço inicial exibido no catálogo público.
 - Seleção de quantidades na página do evento.
 - Reservas de ingressos com duração de 10 minutos.
@@ -79,6 +80,7 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Código interno aleatório e código manual único por ingresso.
 - QR Code protegido por assinatura HMAC-SHA256.
 - Página `Meus Ingressos` e detalhe individual protegido por proprietário.
+- Carteira organizada em seções expansíveis por evento, exibindo os ingressos somente após a seleção do evento.
 - Links públicos de compartilhamento com token aleatório.
 - Geração de novo link e revogação imediata do link anterior.
 - Visualização compartilhada sem transferência de propriedade.

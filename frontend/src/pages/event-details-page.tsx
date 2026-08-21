@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, CalendarDays, MapPin, Tag, UserRound } from 'lucide-react';
+import { ArrowLeft, CalendarDays, ChevronDown, ChevronUp, MapPin, Tag, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getPublishedEvent } from '../services/event-service';
 import {
@@ -12,6 +13,7 @@ import { LoadingState } from '../components/loading-state';
 
 export function EventDetailsPage() {
   const { slug = '' } = useParams();
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const eventQuery = useQuery({
     queryKey: ['events', 'public', slug],
     queryFn: () => getPublishedEvent(slug),
@@ -36,6 +38,7 @@ export function EventDetailsPage() {
   }
 
   const event = eventQuery.data;
+  const canCollapseDescription = event.description.length > 360;
 
   return (
     <article>
@@ -58,7 +61,15 @@ export function EventDetailsPage() {
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">Conheça a experiência</p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.035em] text-slate-950">Sobre o evento</h2>
-          <p className="mt-5 max-w-3xl whitespace-pre-line text-base leading-8 text-slate-600">{event.description}</p>
+          <div className="relative mt-5 max-w-3xl">
+            <p className={`whitespace-pre-line text-base leading-8 text-slate-600 ${canCollapseDescription && !descriptionExpanded ? 'line-clamp-6' : ''}`}>{event.description}</p>
+            {canCollapseDescription && !descriptionExpanded && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#f7f9fc] to-transparent" />}
+          </div>
+          {canCollapseDescription && (
+            <button type="button" aria-expanded={descriptionExpanded} onClick={() => setDescriptionExpanded((current) => !current)} className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:border-blue-200 hover:text-blue-700">
+              {descriptionExpanded ? <><ChevronUp size={16} /> Mostrar menos</> : <>Ver descrição completa <ChevronDown size={16} /></>}
+            </button>
+          )}
           {event.organizer && (
             <p className="mt-8 inline-flex items-center gap-2 text-sm text-slate-500"><UserRound size={17} className="text-blue-600" />Organizado por <strong className="text-slate-800">{event.organizer.name}</strong></p>
           )}

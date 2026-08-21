@@ -29,6 +29,82 @@ const emptyForm: TicketTypeFormData = {
   capacity: 1,
 };
 
+const ticketPresets = [
+  {
+    name: 'Pista — Inteira',
+    sector: 'Pista',
+    priceType: 'Inteira',
+    description: 'Ingresso com valor integral para acesso ao setor pista, sem lugar marcado.',
+  },
+  {
+    name: 'Pista — Meia',
+    sector: 'Pista',
+    priceType: 'Meia-entrada',
+    description: 'Meia-entrada para o setor pista, mediante comprovação na entrada.',
+  },
+  {
+    name: 'Pista VIP — Inteira',
+    sector: 'Pista VIP',
+    priceType: 'Inteira',
+    description: 'Ingresso com valor integral para a área VIP, com espaço exclusivo e visão privilegiada.',
+  },
+  {
+    name: 'Pista VIP — Meia',
+    sector: 'Pista VIP',
+    priceType: 'Meia-entrada',
+    description: 'Meia-entrada para a área VIP, mediante comprovação na entrada.',
+  },
+  {
+    name: 'Camarote — Inteira',
+    sector: 'Camarote',
+    priceType: 'Inteira',
+    description: 'Ingresso com valor integral para o camarote ou espaço reservado do evento.',
+  },
+  {
+    name: 'Camarote — Meia',
+    sector: 'Camarote',
+    priceType: 'Meia-entrada',
+    description: 'Meia-entrada para o camarote, mediante comprovação na entrada.',
+  },
+  {
+    name: 'Lote promocional',
+    sector: 'Lote',
+    priceType: 'Promocional',
+    description: 'Valor promocional por tempo ou quantidade limitada.',
+  },
+] as const;
+
+const sectorOrder = ['Pista', 'Pista VIP', 'Camarote', 'Lote'] as const;
+
+function compareTicketTypes(first: TicketType, second: TicketType) {
+  const [firstSector = first.name, firstPriceType = ''] = first.name
+    .split('—')
+    .map((part) => part.trim());
+  const [secondSector = second.name, secondPriceType = ''] = second.name
+    .split('—')
+    .map((part) => part.trim());
+  const firstSectorIndex = sectorOrder.findIndex((sector) => sector === firstSector);
+  const secondSectorIndex = sectorOrder.findIndex((sector) => sector === secondSector);
+  const normalizedFirstIndex = firstSectorIndex === -1 ? sectorOrder.length : firstSectorIndex;
+  const normalizedSecondIndex = secondSectorIndex === -1 ? sectorOrder.length : secondSectorIndex;
+
+  if (normalizedFirstIndex !== normalizedSecondIndex) {
+    return normalizedFirstIndex - normalizedSecondIndex;
+  }
+
+  const sectorComparison = firstSector.localeCompare(secondSector, 'pt-BR');
+  if (sectorComparison !== 0) return sectorComparison;
+
+  const priceTypeOrder = (priceType: string) => {
+    if (priceType.includes('Inteira')) return 0;
+    if (priceType.includes('Meia')) return 1;
+    return 2;
+  };
+  const priceTypeComparison = priceTypeOrder(firstPriceType) - priceTypeOrder(secondPriceType);
+
+  return priceTypeComparison || first.name.localeCompare(second.name, 'pt-BR');
+}
+
 export function TicketTypesPage() {
   const { id = '' } = useParams();
   const { token } = useAuth();
@@ -48,12 +124,14 @@ export function TicketTypesPage() {
   const {
     register,
     reset,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<TicketTypeFormData>({
     resolver: zodResolver(ticketTypeSchema),
     defaultValues: emptyForm,
   });
+  const selectedTicketName = watch('name');
 
   useEffect(() => {
     if (!editing) {
@@ -68,6 +146,23 @@ export function TicketTypesPage() {
       capacity: editing.capacity,
     });
   }, [editing, reset]);
+
+  useEffect(() => {
+    if (!editing) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setEditing(null);
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [editing]);
 
   const saveMutation = useMutation({
     mutationFn: (input: TicketTypeInput) =>
@@ -113,6 +208,21 @@ export function TicketTypesPage() {
     }
   });
 
+  const applyPreset = (preset: (typeof ticketPresets)[number]) => {
+    setSubmitError(null);
+
+    if (selectedTicketName === preset.name) {
+      reset(emptyForm);
+      return;
+    }
+
+    reset({
+      ...emptyForm,
+      name: preset.name,
+      description: preset.description,
+    });
+  };
+
   const remove = async (ticketType: TicketType) => {
     if (!window.confirm(`Excluir o ingresso “${ticketType.name}”?`)) return;
     setSubmitError(null);
@@ -138,6 +248,7 @@ export function TicketTypesPage() {
 
   const event = eventQuery.data;
   const ticketTypes = ticketTypesQuery.data;
+  const orderedTicketTypes = [...ticketTypes].sort(compareTicketTypes);
 
   if (event.saleMode !== 'GENERAL_ADMISSION') {
     return (
@@ -149,31 +260,115 @@ export function TicketTypesPage() {
     );
   }
 
+  const ticketForm = (
+    <form
+      onSubmit={onSubmit}
+      className="h-fit space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <h2 id="ticket-form-title" className="text-xl font-extrabold text-slate-950">
+          {editing ? 'Editar ingresso' : 'Novo ingresso'}
+        </h2>
+        {editing && (
+          <button
+            type="button"
+            onClick={() => setEditing(null)}
+            aria-label="Fechar edição"
+            className="grid size-9 place-items-center rounded-full bg-slate-100 text-xl leading-none text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
+          >
+            ×
+          </button>
+        )}
+      </div>
+      {!editing && (
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-bold text-slate-700">Modelos rápidos</span>
+            <span className="text-xs font-semibold text-slate-400">Opcional</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {ticketPresets.map((preset) => (
+              <button
+                key={preset.name}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                className={`rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition ${
+                  selectedTicketName === preset.name
+                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700'
+                }`}
+              >
+                <span className="block">{preset.sector}</span>
+                <span className="mt-0.5 block text-xs font-semibold opacity-70">{preset.priceType}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-slate-400">O modelo preenche o nome e a descrição. Você define o preço e a quantidade.</p>
+        </div>
+      )}
+      <FormField id="name" label="Nome" placeholder="Pista, VIP, Meia…" autoFocus={Boolean(editing)} error={errors.name?.message} {...register('name')} />
+      <label>
+        <span className="mb-2 block text-sm font-bold text-slate-700">Descrição (opcional)</span>
+        <textarea rows={3} {...register('description')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none focus:border-blue-500" />
+        {errors.description && <span className="mt-2 block text-sm text-rose-300">{errors.description.message}</span>}
+      </label>
+      <FormField
+        id="priceReais"
+        label="Preço (R$)"
+        type="number"
+        min="0"
+        step="0.01"
+        onFocus={(event) => {
+          if (event.currentTarget.value === '0') event.currentTarget.select();
+        }}
+        error={errors.priceReais?.message}
+        {...register('priceReais', { valueAsNumber: true })}
+      />
+      <p className="-mt-3 text-xs leading-5 text-slate-400">Informe o valor final deste ingresso. Use R$ 0,00 somente para eventos gratuitos.</p>
+      <FormField id="capacity" label="Capacidade" type="number" min="1" step="1" error={errors.capacity?.message} {...register('capacity', { valueAsNumber: true })} />
+      <p className="-mt-3 text-xs leading-5 text-slate-400">Quantidade total disponível para esta categoria ou lote.</p>
+      {submitError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{submitError}</p>}
+      <div className="flex gap-2">
+        {editing && <button type="button" onClick={() => setEditing(null)} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Cancelar</button>}
+        <button type="submit" disabled={saveMutation.isPending} className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{saveMutation.isPending ? 'Salvando…' : 'Salvar'}</button>
+      </div>
+    </form>
+  );
+
   return (
     <section className="mx-auto max-w-6xl px-6 py-14">
       <Link to="/organizador" className="text-sm font-bold text-blue-700">← Voltar aos eventos</Link>
       <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.04em] text-slate-950">Ingressos de {event.title}</h1>
-      <p className="mt-3 text-slate-400">Configure preço e estoque. Valores são armazenados em centavos no servidor.</p>
+      <p className="mt-3 text-slate-500">Escolha um modelo rápido ou crie uma categoria própria para configurar preço e quantidade.</p>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_23rem]">
         <div className="space-y-4">
           {ticketTypes.length === 0 && (
             <EmptyState title="Nenhum tipo de ingresso cadastrado" description="Use o formulário ao lado para criar o primeiro lote deste evento." compact className="" />
           )}
-          {ticketTypes.map((ticketType) => {
+          {orderedTicketTypes.map((ticketType) => {
             const reserved = ticketType.capacity - ticketType.availableQuantity;
+            const occupiedPercentage = Math.min(
+              100,
+              Math.round((reserved / ticketType.capacity) * 100),
+            );
             return (
-              <article key={ticketType.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
+              <article key={ticketType.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
                     <h2 className="text-xl font-extrabold text-slate-950">{ticketType.name}</h2>
                     <p className="mt-1 font-bold text-blue-700">{formatMoney(ticketType.priceCents)}</p>
-                    {ticketType.description && <p className="mt-3 text-sm text-slate-400">{ticketType.description}</p>}
-                    <p className="mt-4 text-sm text-slate-600">{ticketType.availableQuantity} disponíveis de {ticketType.capacity} · {reserved} reservados</p>
+                    {ticketType.description && <p className="mt-2 line-clamp-1 text-sm text-slate-400">{ticketType.description}</p>}
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <p className="shrink-0 text-sm text-slate-600">{ticketType.availableQuantity} disponíveis de {ticketType.capacity} · {reserved} reservados</p>
+                      <div className="h-1.5 w-full max-w-52 overflow-hidden rounded-full bg-slate-100" aria-label={`${occupiedPercentage}% dos ingressos reservados`}>
+                        <div className="h-full rounded-full bg-blue-600 transition-[width]" style={{ width: `${occupiedPercentage}%` }} />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => setEditing(ticketType)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">Editar</button>
-                    <button type="button" onClick={() => void remove(ticketType)} disabled={reserved > 0 || deleteMutation.isPending} className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-700 disabled:cursor-not-allowed disabled:opacity-40">Excluir</button>
+                  <div className="flex shrink-0 gap-2">
+                    <button type="button" onClick={() => setEditing(ticketType)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700">Editar</button>
+                    <button type="button" onClick={() => void remove(ticketType)} disabled={reserved > 0 || deleteMutation.isPending} className="rounded-lg border border-rose-200 px-3 py-1.5 text-sm text-rose-700 disabled:cursor-not-allowed disabled:opacity-40">Excluir</button>
                   </div>
                 </div>
               </article>
@@ -181,23 +376,17 @@ export function TicketTypesPage() {
           })}
         </div>
 
-        <form onSubmit={onSubmit} className="h-fit space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-extrabold text-slate-950">{editing ? 'Editar ingresso' : 'Novo ingresso'}</h2>
-          <FormField id="name" label="Nome" placeholder="Pista, VIP, Meia…" error={errors.name?.message} {...register('name')} />
-          <label>
-            <span className="mb-2 block text-sm font-bold text-slate-700">Descrição (opcional)</span>
-            <textarea rows={3} {...register('description')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none focus:border-blue-500" />
-            {errors.description && <span className="mt-2 block text-sm text-rose-300">{errors.description.message}</span>}
-          </label>
-          <FormField id="priceReais" label="Preço (R$)" type="number" min="0" step="0.01" error={errors.priceReais?.message} {...register('priceReais', { valueAsNumber: true })} />
-          <FormField id="capacity" label="Capacidade" type="number" min="1" step="1" error={errors.capacity?.message} {...register('capacity', { valueAsNumber: true })} />
-          {submitError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{submitError}</p>}
-          <div className="flex gap-2">
-            {editing && <button type="button" onClick={() => setEditing(null)} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Cancelar</button>}
-            <button type="submit" disabled={saveMutation.isPending} className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{saveMutation.isPending ? 'Salvando…' : 'Salvar'}</button>
-          </div>
-        </form>
+        {!editing && ticketForm}
       </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6">
+          <button type="button" onClick={() => setEditing(null)} aria-label="Fechar edição" className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
+          <div role="dialog" aria-modal="true" aria-labelledby="ticket-form-title" className="relative max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl">
+            {ticketForm}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
