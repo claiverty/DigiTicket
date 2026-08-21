@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { TicketView } from '../components/ticket-view';
+import { LoadingState } from '../components/loading-state';
 import { getSharedTicket } from '../services/ticket-service';
 
 export function SharedTicketPage() {
@@ -13,15 +14,15 @@ export function SharedTicketPage() {
   });
 
   if (ticketQuery.isPending) {
-    return <div className="mx-auto max-w-5xl px-6 py-20 text-slate-400">Carregando ingresso compartilhado…</div>;
+    return <LoadingState label="Carregando ingresso compartilhado" variant="details" className="" />;
   }
 
   if (ticketQuery.isError) {
     return (
       <section className="mx-auto max-w-2xl px-6 py-20 text-center">
-        <h1 className="text-3xl font-semibold text-white">Link inválido ou revogado</h1>
+        <h1 className="text-3xl font-extrabold text-slate-950">Link inválido ou revogado</h1>
         <p className="mt-4 text-slate-400">Solicite um novo link ao proprietário do ingresso.</p>
-        <Link to="/" className="mt-6 inline-block font-semibold text-emerald-300">Conhecer o DigiTicket</Link>
+        <Link to="/" className="mt-6 inline-block font-bold text-blue-700">Conhecer o DigiTicket</Link>
       </section>
     );
   }

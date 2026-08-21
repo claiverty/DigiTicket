@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { ArrowRight, ShieldCheck, TicketCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { FormField } from '../components/form-field';
@@ -40,20 +41,16 @@ export function RegisterPage() {
   });
 
   return (
-    <section className="mx-auto max-w-xl px-6 py-16 lg:py-24">
-      <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
-          Nova conta
-        </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
-          Crie seu acesso.
-        </h1>
-        <p className="mt-4 text-slate-400">
-          Cadastros públicos são criados com o perfil de cliente.
-        </p>
-      </div>
+    <section className="mx-auto max-w-5xl px-5 py-10 sm:px-6 lg:py-20">
+      <div className="grid overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_30px_90px_-55px_rgba(15,23,42,0.5)] lg:grid-cols-[0.82fr_1.18fr]">
+        <div className="relative hidden overflow-hidden bg-[#071a3d] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <span className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full border-[3.5rem] border-blue-500/15" />
+          <div className="relative"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-300">Sua experiência começa aqui</p><h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-[-0.045em]">Um ingresso.<br />Muitas histórias.</h1><p className="mt-5 text-sm leading-7 text-blue-100/70">Crie sua conta para reservar, guardar e transferir seus ingressos com facilidade.</p></div>
+          <div className="relative space-y-4 border-t border-white/10 pt-6 text-sm text-blue-100/80"><p className="flex items-center gap-3"><TicketCheck size={18} className="text-blue-400" /> Carteira digital organizada</p><p className="flex items-center gap-3"><ShieldCheck size={18} className="text-blue-400" /> Acesso seguro à sua conta</p></div>
+        </div>
 
-      <form onSubmit={onSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+      <form onSubmit={onSubmit} className="p-6 sm:p-9 lg:p-12">
+        <div className="mb-8"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">Nova conta</p><h2 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] text-slate-950">Crie seu acesso.</h2><p className="mt-3 text-sm text-slate-500">O cadastro público cria uma conta de cliente.</p></div>
         <div className="space-y-5">
           <FormField
             id="name"
@@ -87,7 +84,7 @@ export function RegisterPage() {
         </div>
 
         {submitError && (
-          <p role="alert" className="mt-5 rounded-xl bg-rose-400/10 p-3 text-sm text-rose-200">
+          <p role="alert" className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">
             {submitError}
           </p>
         )}
@@ -95,18 +92,19 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-6 w-full rounded-xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Criando conta…' : 'Criar conta'}
+          {isSubmitting ? 'Criando conta…' : <>Criar conta <ArrowRight size={16} /></>}
         </button>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-slate-500">
           Já possui uma conta?{' '}
-          <Link className="font-semibold text-emerald-300 hover:text-emerald-200" to="/entrar">
+          <Link className="font-bold text-blue-700 hover:text-blue-800" to="/entrar">
             Entrar
           </Link>
         </p>
       </form>
+      </div>
     </section>
   );
 }

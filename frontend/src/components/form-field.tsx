@@ -6,16 +6,16 @@ interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export function FormField({ label, error, id, ...inputProps }: FormFieldProps) {
   return (
     <label className="block" htmlFor={id}>
-      <span className="mb-2 block text-sm font-medium text-slate-200">{label}</span>
+      <span className="mb-2 block text-sm font-bold text-slate-700">{label}</span>
       <input
         {...inputProps}
         id={id}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
-        className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/15 disabled:cursor-not-allowed disabled:opacity-60"
       />
       {error && (
-        <span id={`${id}-error`} className="mt-2 block text-sm text-rose-300">
+        <span id={`${id}-error`} className="mt-2 block text-sm text-rose-600">
           {error}
         </span>
       )}

@@ -1,19 +1,30 @@
+@import '@fontsource-variable/manrope';
 @import 'tailwindcss';
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #f8fafc;
-  background: #020617;
+  font-family: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+  color: #0f172a;
+  background: #f7f9fc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { min-width: 320px; min-height: 100vh; margin: 0; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, a { transition-property: color, background-color, border-color, opacity, transform, box-shadow; transition-duration: 180ms; }
+::selection { color: #fff; background: #2563eb; }
+:focus-visible { outline: 3px solid rgba(37, 99, 235, 0.3); outline-offset: 2px; }
+
+@keyframes hero-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
+.hero-slide { animation: hero-reveal 520ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

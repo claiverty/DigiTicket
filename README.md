@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 10.1 — testes críticos e respostas de erro padronizadas.
+> Status atual: Fase 10.3 — identidade visual clara, responsiva e padronizada.
 
 ## Sobre
 
@@ -98,6 +98,12 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Enriquecimento automático da descrição com conteúdo editorial da Ticketmaster Brasil.
 - Proteção contra importação duplicada do mesmo evento externo.
 - Tratamento de credencial ausente ou recusada, limite de uso e indisponibilidade externa.
+- Skeletons acessíveis e estados vazios reutilizáveis nas principais áreas da aplicação.
+- Identidade visual própria em branco e azul, com tipografia Manrope e ícones Lucide.
+- Landing page responsiva com destaques rotativos dos eventos publicados, categorias e busca integrada.
+- Busca pública por título, descrição, local ou cidade sem diferenciar maiúsculas e acentos.
+- Header enxuto com busca, menu contextual de conta e navegação adaptável a dispositivos móveis.
+- Cards, formulários, checkout, ingressos, portaria e painéis alinhados ao mesmo sistema visual.
 
 ## Autenticação
 
@@ -370,6 +376,8 @@ O frontend não acessará diretamente o banco. Regras críticas serão implement
 - React Hook Form
 - Zod
 - ZXing para leitura de QR Code no navegador
+- Lucide React para o conjunto de ícones
+- Manrope Variable hospedada localmente pelo frontend
 
 ### Backend
 
@@ -524,8 +532,8 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Loading states, skeletons e estados vazios.
-2. Responsividade, acessibilidade e refinamentos de experiência.
+1. Revisão de acessibilidade com navegação completa por teclado e contraste validado.
+2. Divisão do bundle do frontend por rota para reduzir o carregamento inicial.
 3. Editor visual avançado para plantas irregulares e múltiplos corredores.
 
 ## Limitações atuais

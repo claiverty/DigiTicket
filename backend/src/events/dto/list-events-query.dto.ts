@@ -9,7 +9,10 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ListEventsQueryDto {
-  @ApiPropertyOptional({ description: 'Busca parcial pelo título' })
+  @ApiPropertyOptional({
+    description:
+      'Busca parcial por título, descrição, local ou cidade, ignorando acentos',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -20,7 +23,9 @@ export class ListEventsQueryDto {
   @IsEnum(EventCategory)
   category?: EventCategory;
 
-  @ApiPropertyOptional({ description: 'Busca parcial pela cidade' })
+  @ApiPropertyOptional({
+    description: 'Busca parcial pela cidade, ignorando acentos',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)

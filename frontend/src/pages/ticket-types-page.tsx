@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import { FormField } from '../components/form-field';
+import { EmptyState } from '../components/empty-state';
+import { LoadingState } from '../components/loading-state';
 import { useAuth } from '../hooks/use-auth';
 import {
   ticketTypeSchema,
@@ -127,11 +129,11 @@ export function TicketTypesPage() {
   };
 
   if (eventQuery.isPending || ticketTypesQuery.isPending) {
-    return <div className="mx-auto max-w-6xl px-6 py-20 text-slate-400">Carregando ingressos…</div>;
+    return <LoadingState label="Carregando tipos de ingresso" variant="form" className="" />;
   }
 
   if (eventQuery.isError || ticketTypesQuery.isError) {
-    return <div className="mx-auto max-w-6xl px-6 py-20 text-rose-200">Evento não encontrado ou sem permissão de acesso.</div>;
+    return <div className="mx-auto max-w-6xl px-6 py-20 text-rose-700">Evento não encontrado ou sem permissão de acesso.</div>;
   }
 
   const event = eventQuery.data;
@@ -140,8 +142,8 @@ export function TicketTypesPage() {
   if (event.saleMode !== 'GENERAL_ADMISSION') {
     return (
       <section className="mx-auto max-w-3xl px-6 py-20">
-        <Link to="/organizador" className="text-sm font-semibold text-emerald-300">← Voltar</Link>
-        <h1 className="mt-5 text-3xl font-semibold text-white">Assentos reservados</h1>
+        <Link to="/organizador" className="text-sm font-bold text-blue-700">← Voltar</Link>
+        <h1 className="mt-5 text-3xl font-extrabold text-slate-950">Assentos reservados</h1>
         <p className="mt-4 text-slate-400">Este evento usará mapa de assentos, que será implementado em uma fase posterior.</p>
       </section>
     );
@@ -149,29 +151,29 @@ export function TicketTypesPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-14">
-      <Link to="/organizador" className="text-sm font-semibold text-emerald-300">← Voltar aos eventos</Link>
-      <h1 className="mt-5 text-4xl font-semibold tracking-tight text-white">Ingressos de {event.title}</h1>
+      <Link to="/organizador" className="text-sm font-bold text-blue-700">← Voltar aos eventos</Link>
+      <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.04em] text-slate-950">Ingressos de {event.title}</h1>
       <p className="mt-3 text-slate-400">Configure preço e estoque. Valores são armazenados em centavos no servidor.</p>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_23rem]">
         <div className="space-y-4">
           {ticketTypes.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-slate-400">Nenhum tipo de ingresso cadastrado.</div>
+            <EmptyState title="Nenhum tipo de ingresso cadastrado" description="Use o formulário ao lado para criar o primeiro lote deste evento." compact className="" />
           )}
           {ticketTypes.map((ticketType) => {
             const reserved = ticketType.capacity - ticketType.availableQuantity;
             return (
-              <article key={ticketType.id} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <article key={ticketType.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{ticketType.name}</h2>
-                    <p className="mt-1 font-semibold text-emerald-300">{formatMoney(ticketType.priceCents)}</p>
+                    <h2 className="text-xl font-extrabold text-slate-950">{ticketType.name}</h2>
+                    <p className="mt-1 font-bold text-blue-700">{formatMoney(ticketType.priceCents)}</p>
                     {ticketType.description && <p className="mt-3 text-sm text-slate-400">{ticketType.description}</p>}
-                    <p className="mt-4 text-sm text-slate-300">{ticketType.availableQuantity} disponíveis de {ticketType.capacity} · {reserved} reservados</p>
+                    <p className="mt-4 text-sm text-slate-600">{ticketType.availableQuantity} disponíveis de {ticketType.capacity} · {reserved} reservados</p>
                   </div>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setEditing(ticketType)} className="rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-200">Editar</button>
-                    <button type="button" onClick={() => void remove(ticketType)} disabled={reserved > 0 || deleteMutation.isPending} className="rounded-lg border border-rose-300/20 px-3 py-2 text-sm text-rose-200 disabled:cursor-not-allowed disabled:opacity-40">Excluir</button>
+                    <button type="button" onClick={() => setEditing(ticketType)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">Editar</button>
+                    <button type="button" onClick={() => void remove(ticketType)} disabled={reserved > 0 || deleteMutation.isPending} className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-700 disabled:cursor-not-allowed disabled:opacity-40">Excluir</button>
                   </div>
                 </div>
               </article>
@@ -179,20 +181,20 @@ export function TicketTypesPage() {
           })}
         </div>
 
-        <form onSubmit={onSubmit} className="h-fit space-y-5 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-xl font-semibold text-white">{editing ? 'Editar ingresso' : 'Novo ingresso'}</h2>
+        <form onSubmit={onSubmit} className="h-fit space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-extrabold text-slate-950">{editing ? 'Editar ingresso' : 'Novo ingresso'}</h2>
           <FormField id="name" label="Nome" placeholder="Pista, VIP, Meia…" error={errors.name?.message} {...register('name')} />
           <label>
-            <span className="mb-2 block text-sm font-medium text-slate-200">Descrição (opcional)</span>
-            <textarea rows={3} {...register('description')} className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none focus:border-emerald-400" />
+            <span className="mb-2 block text-sm font-bold text-slate-700">Descrição (opcional)</span>
+            <textarea rows={3} {...register('description')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none focus:border-blue-500" />
             {errors.description && <span className="mt-2 block text-sm text-rose-300">{errors.description.message}</span>}
           </label>
           <FormField id="priceReais" label="Preço (R$)" type="number" min="0" step="0.01" error={errors.priceReais?.message} {...register('priceReais', { valueAsNumber: true })} />
           <FormField id="capacity" label="Capacidade" type="number" min="1" step="1" error={errors.capacity?.message} {...register('capacity', { valueAsNumber: true })} />
-          {submitError && <p role="alert" className="rounded-xl bg-rose-400/10 p-3 text-sm text-rose-200">{submitError}</p>}
+          {submitError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{submitError}</p>}
           <div className="flex gap-2">
-            {editing && <button type="button" onClick={() => setEditing(null)} className="flex-1 rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold">Cancelar</button>}
-            <button type="submit" disabled={saveMutation.isPending} className="flex-1 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 disabled:opacity-50">{saveMutation.isPending ? 'Salvando…' : 'Salvar'}</button>
+            {editing && <button type="button" onClick={() => setEditing(null)} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Cancelar</button>}
+            <button type="submit" disabled={saveMutation.isPending} className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{saveMutation.isPending ? 'Salvando…' : 'Salvar'}</button>
           </div>
         </form>
       </div>

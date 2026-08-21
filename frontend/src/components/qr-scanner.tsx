@@ -57,7 +57,7 @@ export function QrScanner({ disabled = false, onScan }: QrScannerProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="overflow-hidden rounded-xl bg-black">
         <video
           ref={videoRef}
@@ -76,13 +76,13 @@ export function QrScanner({ disabled = false, onScan }: QrScannerProps) {
         type="button"
         disabled={disabled}
         onClick={active ? stop : start}
-        className="mt-4 w-full rounded-xl border border-emerald-300/25 px-4 py-3 font-semibold text-emerald-200 hover:border-emerald-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 w-full rounded-xl border border-blue-200 px-4 py-3 font-bold text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {active ? 'Parar câmera' : 'Ler QR Code com a câmera'}
       </button>
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-amber-200">
+        <p role="alert" className="mt-3 text-sm text-amber-700">
           {error}
         </p>
       )}

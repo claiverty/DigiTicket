@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { QrScanner } from '../components/qr-scanner';
+import { EmptyState } from '../components/empty-state';
+import { LoadingState } from '../components/loading-state';
 import { useAuth } from '../hooks/use-auth';
 import {
   getGateEvents,
@@ -13,10 +15,10 @@ import type {
 } from '../types/gate';
 
 const resultStyles: Record<TicketValidationResult, string> = {
-  VALID: 'border-emerald-300/30 bg-emerald-400/10 text-emerald-100',
-  INVALID: 'border-rose-300/30 bg-rose-400/10 text-rose-100',
-  WRONG_EVENT: 'border-amber-300/30 bg-amber-400/10 text-amber-100',
-  ALREADY_USED: 'border-orange-300/30 bg-orange-400/10 text-orange-100',
+  VALID: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  INVALID: 'border-rose-200 bg-rose-50 text-rose-800',
+  WRONG_EVENT: 'border-amber-200 bg-amber-50 text-amber-800',
+  ALREADY_USED: 'border-orange-200 bg-orange-50 text-orange-800',
 };
 
 const resultLabels: Record<TicketValidationResult, string> = {
@@ -75,10 +77,10 @@ export function GatePage() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-400">
+        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">
           Portaria
         </p>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">
+        <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950">
           Validar ingresso
         </h1>
         <p className="mt-3 text-slate-400">
@@ -87,24 +89,22 @@ export function GatePage() {
       </div>
 
       {eventsQuery.isPending && (
-        <p className="mt-8 text-slate-400">Carregando eventos…</p>
+        <LoadingState label="Carregando eventos da portaria" variant="list" count={2} className="mt-8" />
       )}
 
       {eventsQuery.isError && (
-        <p role="alert" className="mt-8 rounded-xl bg-rose-400/10 p-4 text-rose-200">
+        <p role="alert" className="mt-8 rounded-xl bg-rose-50 p-4 text-rose-700">
           Não foi possível carregar os eventos da portaria.
         </p>
       )}
 
       {eventsQuery.data?.length === 0 && (
-        <p className="mt-8 rounded-xl border border-dashed border-white/15 p-8 text-center text-slate-400">
-          Nenhum evento publicado está disponível.
-        </p>
+        <EmptyState title="Nenhum evento publicado está disponível" description="Os eventos aparecerão aqui assim que forem publicados pelo organizador." compact className="mt-8" />
       )}
 
       {eventsQuery.data && eventsQuery.data.length > 0 && (
         <>
-          <label className="mt-8 block max-w-xl text-sm font-medium text-slate-200">
+          <label className="mt-8 block max-w-xl text-sm font-bold text-slate-700">
             Evento
             <select
               value={eventId}
@@ -112,7 +112,7 @@ export function GatePage() {
                 setEventId(event.target.value);
                 setResult(null);
               }}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none focus:border-emerald-300/50"
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none focus:border-blue-500"
             >
               {eventsQuery.data.map((event) => (
                 <option key={event.id} value={event.id}>
@@ -130,7 +130,7 @@ export function GatePage() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-white">Leitura pela câmera</h2>
+              <h2 className="mb-3 text-lg font-extrabold text-slate-950">Leitura pela câmera</h2>
               <QrScanner
                 disabled={validationMutation.isPending}
                 onScan={submitCode}
@@ -138,28 +138,28 @@ export function GatePage() {
             </div>
 
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-white">Entrada manual</h2>
+              <h2 className="mb-3 text-lg font-extrabold text-slate-950">Entrada manual</h2>
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
                   submitCode(code);
                 }}
-                className="rounded-2xl border border-white/10 bg-white/5 p-5"
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
               >
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-bold text-slate-700">
                   Código do ingresso
                   <input
                     value={code}
                     onChange={(event) => setCode(event.target.value.toUpperCase())}
                     placeholder="DT-XXXX-XXXX-XXXX"
                     autoComplete="off"
-                    className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 font-mono text-white uppercase outline-none focus:border-emerald-300/50"
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-slate-950 uppercase outline-none focus:border-blue-500"
                   />
                 </label>
                 <button
                   type="submit"
                   disabled={!code.trim() || validationMutation.isPending}
-                  className="mt-4 w-full rounded-xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {validationMutation.isPending ? 'Validando…' : 'Validar ingresso'}
                 </button>
@@ -168,7 +168,7 @@ export function GatePage() {
           </div>
 
           {validationMutation.isError && (
-            <p role="alert" className="mt-6 rounded-xl bg-rose-400/10 p-4 text-rose-200">
+            <p role="alert" className="mt-6 rounded-xl bg-rose-50 p-4 text-rose-700">
               {validationMutation.error.message}
             </p>
           )}
@@ -176,21 +176,21 @@ export function GatePage() {
           {result && <ValidationResultCard response={result} />}
 
           <div className="mt-10">
-            <h2 className="text-xl font-semibold text-white">Validações recentes</h2>
+            <h2 className="text-xl font-extrabold text-slate-950">Validações recentes</h2>
             {validationsQuery.isPending && (
-              <p className="mt-4 text-slate-400">Carregando histórico…</p>
+              <LoadingState label="Carregando histórico de validações" variant="list" count={2} className="mt-4" />
             )}
             {validationsQuery.data?.length === 0 && (
-              <p className="mt-4 text-slate-400">Nenhuma tentativa registrada neste evento.</p>
+              <EmptyState title="Nenhuma tentativa registrada" description="As leituras de QR Code e código manual aparecerão aqui." compact className="mt-4" />
             )}
             <div className="mt-4 space-y-3">
               {validationsQuery.data?.map((validation) => (
                 <div
                   key={validation.id}
-                  className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-semibold text-white">
+                    <p className="font-bold text-slate-950">
                       {resultLabels[validation.result]}
                     </p>
                     <p className="mt-1 text-sm text-slate-400">

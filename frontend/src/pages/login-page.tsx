@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { ArrowRight, ShieldCheck, TicketCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { FormField } from '../components/form-field';
@@ -40,24 +41,24 @@ export function LoginPage() {
   });
 
   return (
-    <section className="mx-auto grid max-w-6xl gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
-      <div className="self-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
-          Acesse sua conta
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-          Seus eventos começam aqui.
-        </h1>
-        <p className="mt-5 max-w-lg text-lg leading-8 text-slate-400">
-          Entre para acompanhar suas próximas experiências e acessar as áreas disponíveis para seu perfil.
-        </p>
-      </div>
+    <section className="mx-auto max-w-5xl px-6 py-12 lg:py-20">
+      <div className="grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_80px_-45px_rgba(15,23,42,0.35)] lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="flex flex-col justify-between bg-blue-600 p-8 text-white sm:p-10">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-200">Área do usuário</p>
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-0.045em]">Bom ter você de volta.</h1>
+            <p className="mt-4 leading-7 text-blue-100">Acesse seus ingressos, reservas e todas as experiências da sua conta.</p>
+          </div>
+          <div className="mt-12 space-y-4 border-t border-white/20 pt-6 text-sm text-blue-50">
+            <p className="flex items-center gap-3"><TicketCheck size={19} /> Ingressos digitais em um só lugar</p>
+            <p className="flex items-center gap-3"><ShieldCheck size={19} /> Acesso protegido à sua conta</p>
+          </div>
+        </div>
 
-      <form
-        onSubmit={onSubmit}
-        className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8"
-      >
-        <div className="space-y-5">
+        <form onSubmit={onSubmit} className="p-8 sm:p-10 lg:p-12">
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Entrar</p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">Acesse sua conta DigiTicket</h2>
+          <div className="mt-8 space-y-5">
           <FormField
             id="email"
             label="E-mail"
@@ -78,29 +79,17 @@ export function LoginPage() {
             disabled={isSubmitting}
             {...register('password')}
           />
-        </div>
+          </div>
 
-        {submitError && (
-          <p role="alert" className="mt-5 rounded-xl bg-rose-400/10 p-3 text-sm text-rose-200">
-            {submitError}
-          </p>
-        )}
+          {submitError && <p role="alert" className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{submitError}</p>}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-6 w-full rounded-xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? 'Entrando…' : 'Entrar'}
-        </button>
+          <button type="submit" disabled={isSubmitting} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+            {isSubmitting ? 'Entrando…' : <>Entrar <ArrowRight size={17} /></>}
+          </button>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
-          Ainda não possui conta?{' '}
-          <Link className="font-semibold text-emerald-300 hover:text-emerald-200" to="/cadastro">
-            Criar conta
-          </Link>
-        </p>
-      </form>
+          <p className="mt-6 text-center text-sm text-slate-500">Ainda não possui conta?{' '}<Link className="font-bold text-blue-700 hover:text-blue-800" to="/cadastro">Criar conta</Link></p>
+        </form>
+      </div>
     </section>
   );
 }

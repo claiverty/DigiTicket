@@ -42,23 +42,37 @@ export class EventsService {
     await this.reservationsService.expirePendingReservations();
     const where: Prisma.EventWhereInput = {
       status: EventStatus.PUBLISHED,
-      title: query.search?.trim()
-        ? { contains: query.search.trim(), mode: 'insensitive' }
-        : undefined,
       category: query.category,
-      city: query.city?.trim()
-        ? { contains: query.city.trim(), mode: 'insensitive' }
-        : undefined,
       startDate: query.date ? this.createDateRange(query.date) : undefined,
     };
 
-    return this.prisma.event.findMany({
+    const events = await this.prisma.event.findMany({
       where,
       orderBy: { startDate: 'asc' },
       include: {
         organizer: { select: { name: true } },
         ticketTypes: { orderBy: { priceCents: 'asc' } },
       },
+    });
+
+    const search = this.normalizeSearch(query.search);
+    const city = this.normalizeSearch(query.city);
+
+    return events.filter((event) => {
+      const matchesSearch =
+        !search ||
+        [
+          event.title,
+          event.description,
+          event.venueName,
+          event.address,
+          event.city,
+          event.state,
+        ].some((value) => this.normalizeSearch(value).includes(search));
+      const matchesCity =
+        !city || this.normalizeSearch(event.city).includes(city);
+
+      return matchesSearch && matchesCity;
     });
   }
 
@@ -322,6 +336,14 @@ export class EventsService {
     const end = new Date(start);
     end.setUTCDate(end.getUTCDate() + 1);
     return { gte: start, lt: end };
+  }
+
+  private normalizeSearch(value?: string | null): string {
+    return (value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('pt-BR')
+      .trim();
   }
 
   private async createAvailableSlug(title: string): Promise<string> {

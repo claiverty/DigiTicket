@@ -7,6 +7,7 @@ import { createReservation } from '../services/reservation-service';
 import type { Event, TicketType } from '../types/event';
 import { formatMoney } from '../utils/event-formatters';
 import { SeatSelection } from './seat-selection';
+import { EmptyState } from './empty-state';
 
 export function TicketSelection({ event }: { event: Event }) {
   const { user, token } = useAuth();
@@ -61,27 +62,27 @@ export function TicketSelection({ event }: { event: Event }) {
   }
 
   if (ticketTypes.length === 0) {
-    return <div className="mt-6 rounded-xl bg-white/5 p-4 text-sm text-slate-400">Os ingressos ainda não foram disponibilizados.</div>;
+    return <EmptyState title="Ingressos ainda não disponíveis" description="O organizador ainda não liberou os lotes deste evento." compact className="mt-6" />;
   }
 
   return (
-    <div className="mt-6 border-t border-white/10 pt-6">
-      <h2 className="text-lg font-semibold text-white">Escolha seus ingressos</h2>
+    <div className="mt-6 border-t border-slate-200 pt-6">
+      <h2 className="text-lg font-extrabold text-slate-950">Escolha seus ingressos</h2>
       <div className="mt-4 space-y-4">
         {ticketTypes.map((ticketType) => {
           const quantity = quantities[ticketType.id] ?? 0;
           return (
-            <div key={ticketType.id} className="rounded-xl bg-slate-900/70 p-4">
+            <div key={ticketType.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold text-white">{ticketType.name}</h3>
-                  <p className="mt-1 text-sm text-emerald-300">{formatMoney(ticketType.priceCents)}</p>
+                  <h3 className="font-bold text-slate-950">{ticketType.name}</h3>
+                  <p className="mt-1 text-sm font-bold text-blue-700">{formatMoney(ticketType.priceCents)}</p>
                   <p className="mt-1 text-xs text-slate-500">{ticketType.availableQuantity > 0 ? `${ticketType.availableQuantity} disponíveis` : 'Esgotado'}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button type="button" aria-label={`Remover ${ticketType.name}`} onClick={() => changeQuantity(ticketType, -1)} disabled={quantity === 0} className="h-8 w-8 rounded-lg border border-white/10 disabled:opacity-30">−</button>
+                  <button type="button" aria-label={`Remover ${ticketType.name}`} onClick={() => changeQuantity(ticketType, -1)} disabled={quantity === 0} className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-30">−</button>
                   <span className="w-5 text-center font-semibold">{quantity}</span>
-                  <button type="button" aria-label={`Adicionar ${ticketType.name}`} onClick={() => changeQuantity(ticketType, 1)} disabled={quantity >= ticketType.availableQuantity} className="h-8 w-8 rounded-lg border border-white/10 disabled:opacity-30">+</button>
+                  <button type="button" aria-label={`Adicionar ${ticketType.name}`} onClick={() => changeQuantity(ticketType, 1)} disabled={quantity >= ticketType.availableQuantity} className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-blue-700 disabled:opacity-30">+</button>
                 </div>
               </div>
             </div>
@@ -90,17 +91,17 @@ export function TicketSelection({ event }: { event: Event }) {
       </div>
 
       <div className="mt-5 flex items-center justify-between">
-        <span className="text-sm text-slate-400">{selectedQuantity} ingresso(s)</span>
-        <strong className="text-lg text-white">{formatMoney(totalCents)}</strong>
+        <span className="text-sm text-slate-500">{selectedQuantity} ingresso(s)</span>
+        <strong className="text-lg text-slate-950">{formatMoney(totalCents)}</strong>
       </div>
-      {reservationMutation.isError && <p role="alert" className="mt-4 rounded-xl bg-rose-400/10 p-3 text-sm text-rose-200">{reservationMutation.error instanceof ApiError ? reservationMutation.error.message : 'Não foi possível criar a reserva.'}</p>}
+      {reservationMutation.isError && <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{reservationMutation.error instanceof ApiError ? reservationMutation.error.message : 'Não foi possível criar a reserva.'}</p>}
 
       {!user ? (
-        <Link to="/entrar" state={{ from: `/eventos/${event.slug}` }} className="mt-5 block rounded-xl bg-emerald-400 px-5 py-3 text-center font-semibold text-slate-950">Entre para reservar</Link>
+        <Link to="/entrar" state={{ from: `/eventos/${event.slug}` }} className="mt-5 block rounded-xl bg-blue-600 px-5 py-3 text-center font-bold text-white hover:bg-blue-700">Entre para reservar</Link>
       ) : user.role === 'CUSTOMER' ? (
-        <button type="button" onClick={() => reservationMutation.mutate()} disabled={selectedQuantity === 0 || reservationMutation.isPending} className="mt-5 w-full rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-50">{reservationMutation.isPending ? 'Reservando…' : 'Reservar por 10 minutos'}</button>
+        <button type="button" onClick={() => reservationMutation.mutate()} disabled={selectedQuantity === 0 || reservationMutation.isPending} className="mt-5 w-full rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">{reservationMutation.isPending ? 'Reservando…' : 'Reservar por 10 minutos'}</button>
       ) : (
-        <p className="mt-5 rounded-xl bg-white/5 p-3 text-sm text-slate-400">A reserva está disponível para contas de cliente.</p>
+        <p className="mt-5 rounded-xl bg-slate-50 p-3 text-sm text-slate-500">A reserva está disponível para contas de cliente.</p>
       )}
     </div>
   );

@@ -67,9 +67,7 @@ describe('EventsService', () => {
     expect(eventMock.findMany).toHaveBeenCalledWith({
       where: {
         status: EventStatus.PUBLISHED,
-        title: { contains: 'Festival', mode: 'insensitive' },
         category: EventCategory.SHOW,
-        city: { contains: 'São Paulo', mode: 'insensitive' },
         startDate: undefined,
       },
       orderBy: { startDate: 'asc' },
@@ -78,6 +76,26 @@ describe('EventsService', () => {
         ticketTypes: { orderBy: { priceCents: 'asc' } },
       },
     });
+  });
+
+  it('ignora acentos na busca geral e no filtro de cidade', async () => {
+    const brasiliaEvent = {
+      ...event,
+      title: 'Lagum | Brasília',
+      description: 'Show da banda Lagum.',
+      city: 'Brasília',
+      state: 'DF',
+      venueName: 'Arena BRB',
+      status: EventStatus.PUBLISHED,
+    };
+    eventMock.findMany.mockResolvedValue([brasiliaEvent]);
+
+    const result = await service.listPublished({
+      search: 'brasilia',
+      city: 'BRASILIA',
+    });
+
+    expect(result).toEqual([brasiliaEvent]);
   });
 
   it('cria evento sempre como rascunho e vinculado ao organizador', async () => {

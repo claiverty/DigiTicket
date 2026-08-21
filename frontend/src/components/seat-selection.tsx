@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
+import { EmptyState } from './empty-state';
+import { LoadingState } from './loading-state';
 import { ApiError } from '../services/api';
 import { createSeatReservation, getPublicSeats } from '../services/seating-service';
 import type { Event } from '../types/event';
@@ -53,14 +55,15 @@ export function SeatSelection({ event }: { event: Event }) {
     );
   };
 
-  if (seatsQuery.isPending) return <p className="mt-6 text-sm text-slate-400">Carregando mapa de assentos…</p>;
-  if (seatsQuery.isError) return <p className="mt-6 rounded-xl bg-rose-400/10 p-4 text-sm text-rose-200">Não foi possível carregar o mapa.</p>;
+  if (seatsQuery.isPending) return <LoadingState label="Carregando mapa de assentos" variant="list" count={2} className="mt-6" />;
+  if (seatsQuery.isError) return <p className="mt-6 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">Não foi possível carregar o mapa.</p>;
+  if (seats.length === 0) return <EmptyState title="Assentos ainda não disponíveis" description="O organizador ainda não configurou os lugares deste evento." compact className="mt-6" />;
 
   return (
-    <div className="mt-6 border-t border-white/10 pt-6">
-      <h2 className="text-lg font-semibold text-white">Escolha seus assentos</h2>
-      <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/70 p-4 sm:p-6">
-        <div className="mx-auto mb-8 max-w-lg rounded-b-[50%] border-t-4 border-emerald-300/60 pt-3 text-center text-xs uppercase tracking-[0.25em] text-slate-500">Palco</div>
+    <div className="mt-6 border-t border-slate-200 pt-6">
+      <h2 className="text-lg font-extrabold text-slate-950">Escolha seus assentos</h2>
+      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-6">
+        <div className="mx-auto mb-8 max-w-lg rounded-b-[50%] border-t-4 border-blue-400 pt-3 text-center text-xs uppercase tracking-[0.25em] text-slate-500">Palco</div>
         <div className="overflow-x-auto pb-2">
           <div className="mx-auto w-max space-y-8">
             {[...sections.values()].map((section) => (
@@ -85,10 +88,10 @@ export function SeatSelection({ event }: { event: Event }) {
                             onClick={() => toggleSeat(seat.id)}
                             className={`${seat.ticketType.seatDisplaySize === 'LARGE' ? 'h-12 w-12' : 'h-9 w-9'} rounded-lg text-xs font-semibold transition ${
                               unavailable
-                                ? 'cursor-not-allowed bg-rose-400/20 text-rose-200/50'
+                                ? 'cursor-not-allowed bg-rose-100 text-rose-300'
                                 : isSelected
-                                  ? 'bg-amber-300 text-slate-950'
-                                  : 'bg-emerald-400/20 text-emerald-200 hover:bg-emerald-400/35'
+                                  ? 'bg-blue-600 text-white'
+                                  : 'border border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100'
                             }`}
                           >
                             {seat.seatNumber}
@@ -103,9 +106,9 @@ export function SeatSelection({ event }: { event: Event }) {
           </div>
         </div>
         <div className="mt-7 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
-          <Legend color="bg-emerald-400/30" label="Disponível" />
-          <Legend color="bg-amber-300" label="Selecionado" />
-          <Legend color="bg-rose-400/25" label="Indisponível" />
+          <Legend color="bg-blue-100" label="Disponível" />
+          <Legend color="bg-blue-600" label="Selecionado" />
+          <Legend color="bg-rose-100" label="Indisponível" />
         </div>
       </div>
 
@@ -113,21 +116,21 @@ export function SeatSelection({ event }: { event: Event }) {
         <span className="text-sm text-slate-400">
           {selectedSeats.length ? selectedSeats.map((seat) => `${seat.rowLabel}${seat.seatNumber}`).join(', ') : 'Nenhum assento selecionado'}
         </span>
-        <strong className="text-lg text-white">{formatMoney(totalCents)}</strong>
+        <strong className="text-lg text-slate-950">{formatMoney(totalCents)}</strong>
       </div>
       {reservationMutation.isError && (
-        <p role="alert" className="mt-4 rounded-xl bg-rose-400/10 p-3 text-sm text-rose-200">
+        <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">
           {reservationMutation.error instanceof ApiError ? reservationMutation.error.message : 'Não foi possível reservar os assentos.'}
         </p>
       )}
       {!user ? (
-        <Link to="/entrar" state={{ from: `/eventos/${event.slug}` }} className="mt-5 block rounded-xl bg-emerald-400 px-5 py-3 text-center font-semibold text-slate-950">Entre para reservar</Link>
+        <Link to="/entrar" state={{ from: `/eventos/${event.slug}` }} className="mt-5 block rounded-xl bg-blue-600 px-5 py-3 text-center font-bold text-white">Entre para reservar</Link>
       ) : user.role === 'CUSTOMER' ? (
-        <button type="button" onClick={() => reservationMutation.mutate()} disabled={selected.length === 0 || reservationMutation.isPending} className="mt-5 w-full rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 disabled:opacity-50">
+        <button type="button" onClick={() => reservationMutation.mutate()} disabled={selected.length === 0 || reservationMutation.isPending} className="mt-5 w-full rounded-xl bg-blue-600 px-5 py-3 font-bold text-white disabled:opacity-50">
           {reservationMutation.isPending ? 'Reservando…' : 'Reservar assentos por 10 minutos'}
         </button>
       ) : (
-        <p className="mt-5 rounded-xl bg-white/5 p-3 text-sm text-slate-400">A reserva está disponível para contas de cliente.</p>
+        <p className="mt-5 rounded-xl bg-slate-50 p-3 text-sm text-slate-500">A reserva está disponível para contas de cliente.</p>
       )}
     </div>
   );

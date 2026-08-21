@@ -30,7 +30,7 @@ export function TicketQrCode({ value }: { value: string }) {
   }, [value]);
 
   if (error) {
-    return <p className="rounded-xl bg-rose-400/10 p-4 text-sm text-rose-200">Não foi possível gerar o QR Code.</p>;
+    return <p className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">Não foi possível gerar o QR Code.</p>;
   }
 
   return (
