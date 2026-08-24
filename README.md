@@ -2,11 +2,11 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 11 — MVP funcional, documentado e validado.
+> Status atual: MVP funcional, publicado e validado.
 
 ## Sobre
 
-O DigiTicket foi desenvolvido de forma incremental, priorizando primeiro o fluxo principal completo:
+O DigiTicket cobre o fluxo principal completo de uma plataforma de eventos e ingressos:
 
 ```text
 Organizador publica evento
@@ -18,101 +18,18 @@ Ingresso é emitido
 Portaria valida a entrada
 ```
 
-Este README acompanha a evolução do projeto. Uma funcionalidade só será apresentada como disponível depois de implementada e verificada.
+Este README descreve o produto disponível atualmente. O histórico incremental de desenvolvimento permanece documentado nos commits do repositório.
 
-## Incluído atualmente
+## Produção
 
-- Frontend com React, Vite e TypeScript.
-- React Router para organização das rotas.
-- TanStack Query para comunicação e estado da API.
-- React Hook Form e Zod preparados para os formulários.
-- Tailwind CSS configurado.
-- Backend com NestJS e TypeScript estrito.
-- Prisma configurado para PostgreSQL/Supabase.
-- Projeto Supabase provisionado em São Paulo (`sa-east-1`).
-- Data API desativada, RLS com bloqueio explícito e privilégios diretos revogados.
-- Swagger/OpenAPI disponível em `/api/docs`.
-- Health check disponível em `/api/health`.
-- Validação global das requisições no NestJS.
-- Configuração inicial de CORS, Helmet e limite de requisições.
-- Arquivos `.env.example` documentados.
-- Arquivos `.env` locais protegidos pelo `.gitignore`.
-- Testes iniciais do health check.
-- Modelo `User` e enum de papéis `ORGANIZER`, `CUSTOMER` e `GATE`.
-- Migration versionada para usuários e papéis.
-- Seed idempotente com quatro usuários de demonstração.
-- Cadastro público restrito ao papel `CUSTOMER`.
-- Login com bcrypt e emissão de JWT.
-- Guards globais de autenticação e autorização baseada em papéis.
-- Endpoints `POST /auth/register`, `POST /auth/login` e `GET /auth/me`.
-- Limite específico de tentativas nos endpoints de cadastro e login.
-- Telas de cadastro e login no frontend.
-- Sessão persistida no navegador, logout e rota de perfil protegida.
-- Testes unitários e e2e para cadastro, login, JWT e acesso por papel.
-- Modelo `Event` com categorias, modos de venda e estados de publicação.
-- CRUD de eventos restrito ao organizador proprietário.
-- Publicação, cancelamento e exclusão segura de rascunhos.
-- Slugs legíveis e únicos para URLs públicas.
-- Catálogo público com busca, categoria, cidade, data e ordenação cronológica.
-- Página pública de detalhes do evento.
-- Dashboard inicial do organizador com métricas e gestão de eventos.
-- Seed com um evento publicado e um rascunho de demonstração.
-- Tipos de ingresso por quantidade com preço inteiro em centavos.
-- Modelos rápidos de ingresso com valores de inteira e meia-entrada por setor, além de lote promocional.
-- Gestão de capacidade e disponibilidade pelo organizador, com visualização agrupada por setor.
-- Preço inicial exibido no catálogo público.
-- Seleção de quantidades na página do evento.
-- Reservas de ingressos com duração de 10 minutos.
-- Cálculo do total exclusivamente no backend.
-- Bloqueio atômico de estoque para impedir reservas acima da disponibilidade.
-- Expiração lazy e cancelamento com devolução transacional ao estoque.
-- Página protegida `Minhas reservas` com contagem regressiva.
-- Constraints no PostgreSQL para impedir valores e estoques inválidos.
-- Checkout protegido para reservas pendentes.
-- Pagamento simulado com aprovação e recusa explícitas.
-- Nenhum dado real de cartão solicitado ou armazenado.
-- Valor do pagamento recalculado exclusivamente no backend.
-- Aprovação transacional da reserva e criação de um ingresso-base por unidade.
-- Recusa transacional com devolução imediata do estoque.
-- Proteção contra duas confirmações simultâneas da mesma reserva.
-- Histórico de pagamentos relacionado individualmente às reservas.
-- Um ingresso individual gerado para cada unidade aprovada.
-- Código interno aleatório e código manual único por ingresso.
-- QR Code protegido por assinatura HMAC-SHA256.
-- Página `Meus Ingressos` e detalhe individual protegido por proprietário.
-- Carteira organizada em seções expansíveis por evento, exibindo os ingressos somente após a seleção do evento.
-- Links públicos de compartilhamento com token aleatório.
-- Geração de novo link e revogação imediata do link anterior.
-- Visualização compartilhada sem transferência de propriedade.
-- Área exclusiva para o papel `GATE` com seleção de evento.
-- Leitura de QR Code pela câmera e entrada por código manual.
-- Resultados claros: `VALID`, `INVALID`, `WRONG_EVENT` e `ALREADY_USED`.
-- Consumo atômico do ingresso para impedir duas entradas simultâneas.
-- Histórico das tentativas de validação sem armazenar o código apresentado em texto puro.
-- Solicitação de transferência gratuita para outra conta `CUSTOMER` pelo e-mail.
-- Aceite, recusa e cancelamento de transferências pendentes.
-- Troca transacional de titularidade com novos QR e código manual.
-- Bloqueio do ingresso na portaria enquanto a transferência aguarda decisão.
-- Histórico de transferências recebidas e enviadas.
-- Pesquisa de eventos realizados no Brasil pela Ticketmaster Discovery API.
-- Importação de eventos externos como rascunhos editáveis do DigiTicket.
-- Normalização de categoria, datas, local, endereço e imagem no backend.
-- Enriquecimento automático da descrição com conteúdo editorial da Ticketmaster Brasil.
-- Proteção contra importação duplicada do mesmo evento externo.
-- Tratamento de credencial ausente ou recusada, limite de uso e indisponibilidade externa.
-- Skeletons acessíveis e estados vazios reutilizáveis nas principais áreas da aplicação.
-- Link para pular diretamente ao conteúdo principal e foco visível de alto contraste.
-- Menu da conta e modal de edição operáveis por teclado, com fechamento por `Esc` e retorno correto do foco.
-- Estados selecionados, resultados de busca, ocupação de ingressos e assentos comunicados a leitores de tela.
-- Carrossel pausado durante interação por mouse ou teclado e animações reduzidas conforme a preferência do sistema.
-- Páginas carregadas sob demanda, reduzindo o JavaScript necessário na abertura inicial.
-- Imagens secundárias com carregamento tardio e decodificação assíncrona.
-- Imagens principais do evento priorizadas para preservar a velocidade percebida da página.
-- Identidade visual própria em branco e azul, com tipografia Manrope e ícones Lucide.
-- Landing page responsiva com destaques rotativos dos eventos publicados, categorias e busca integrada.
-- Busca pública por título, descrição, local ou cidade sem diferenciar maiúsculas e acentos.
-- Header enxuto com busca, menu contextual de conta e navegação adaptável a dispositivos móveis.
-- Cards, formulários, checkout, ingressos, portaria e painéis alinhados ao mesmo sistema visual.
+| Serviço | Endereço |
+| --- | --- |
+| Aplicação | [https://meudigiticket.vercel.app](https://meudigiticket.vercel.app) |
+| API | [https://digiticket-api.vercel.app](https://digiticket-api.vercel.app) |
+| Documentação Swagger | [https://digiticket-api.vercel.app/api/docs](https://digiticket-api.vercel.app/api/docs) |
+| Verificação de saúde | [https://digiticket-api.vercel.app/api/health](https://digiticket-api.vercel.app/api/health) |
+
+O frontend e a API são projetos separados na Vercel, ambos ligados ao mesmo monorepo. A API executa em São Paulo (`gru1`), próxima ao banco Supabase em `sa-east-1`, reduzindo a latência das consultas.
 
 ## Autenticação
 
@@ -190,7 +107,7 @@ A reserva só é criada se todas as atualizações forem bem-sucedidas. Em caso 
 
 Reservas vencidas são processadas de forma lazy ao consultar catálogo e reservas ou ao iniciar uma nova reserva. A mudança de estado é condicional, portanto somente um processo consegue liberar cada reserva. Essa estratégia mantém o fluxo correto sem depender exclusivamente de um job em memória.
 
-### Como testar a fase atual
+### Como testar
 
 1. Entre como organizador e abra `Gerenciar ingressos` no evento de entrada geral.
 2. Crie ou edite um tipo de ingresso e confira preço, capacidade e disponibilidade.
@@ -529,9 +446,9 @@ npm run seed
 
 O frontend continuará sem acessar o Supabase diretamente. Toda comunicação permanece no fluxo `Frontend → NestJS → Prisma → PostgreSQL`.
 
-## Preparação para publicação
+## Deploy
 
-O provedor pode variar, mas a publicação deve preservar dois serviços separados: frontend estático e API NestJS. Antes de disponibilizar o sistema:
+O deploy atual preserva dois serviços separados: frontend estático e API NestJS. Para publicar uma nova instalação:
 
 1. gere segredos novos e diferentes para `JWT_SECRET` e `TICKET_SIGNING_SECRET`;
 2. configure `DATABASE_URL`, `DIRECT_URL` e `TICKETMASTER_API_KEY` somente no backend;
@@ -542,6 +459,8 @@ O provedor pode variar, mas a publicação deve preservar dois serviços separad
 7. use `npm run build` no frontend e no backend e inicie a API com `npm run start:prod`;
 8. configure o monitoramento do endpoint `/api/health`;
 9. mantenha HTTPS, necessário também para o acesso à câmera fora de `localhost`.
+
+As configurações específicas da Vercel estão versionadas em `frontend/vercel.json`, responsável pelo fallback das rotas da SPA, e `backend/vercel.json`, que posiciona a API na região `gru1`.
 
 O seed cria contas e dados de demonstração. Ele é adequado para avaliação do projeto, mas não deve ser executado em um ambiente destinado a usuários reais.
 
@@ -584,9 +503,9 @@ npm run test:e2e
 npm run build
 ```
 
-## Planejado
+## Possíveis evoluções
 
-As próximas funcionalidades serão adicionadas e documentadas por fase:
+Melhorias que podem ampliar o projeto sem fazer parte do escopo obrigatório do MVP:
 
 1. Reorganização incremental do frontend por funcionalidades e layouts de papel.
 2. Design system centralizado conforme padrões reais de repetição.
