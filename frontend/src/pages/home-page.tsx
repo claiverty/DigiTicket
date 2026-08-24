@@ -77,6 +77,17 @@ export function HomePage() {
           </div>
 
           <div className="relative mx-auto mt-7 max-w-6xl sm:mt-9">
+            {featuredQuery.isPending ? (
+              <div className="grid animate-pulse gap-1.5 lg:grid-cols-2" role="status" aria-label="Carregando evento em destaque">
+                <div className="min-h-[19rem] rounded-t-[1.5rem] bg-slate-200 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none" />
+                <div className="flex min-h-[21rem] flex-col justify-between rounded-b-[1.5rem] bg-slate-900 p-7 sm:min-h-[27rem] sm:p-10 lg:min-h-[31rem] lg:rounded-r-[1.5rem] lg:rounded-bl-none lg:p-12">
+                  <div className="space-y-5"><div className="h-3 w-28 rounded-full bg-white/20" /><div className="h-12 w-4/5 rounded-xl bg-white/15" /><div className="h-12 w-3/5 rounded-xl bg-white/15" /></div>
+                  <div className="space-y-3"><div className="h-4 w-2/3 rounded-full bg-white/15" /><div className="h-4 w-1/2 rounded-full bg-white/15" /></div>
+                  <div className="flex items-end justify-between"><div className="h-12 w-20 rounded-lg bg-white/15" /><div className="h-11 w-32 rounded-full bg-white/20" /></div>
+                </div>
+                <span className="sr-only">Carregando evento em destaque</span>
+              </div>
+            ) : (
             <div key={featuredEvent?.id ?? 'fallback'} className="hero-slide grid gap-1.5 lg:grid-cols-2" aria-live="polite">
               <div className="relative min-h-[19rem] overflow-hidden rounded-t-[1.5rem] bg-slate-100 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none">
                 {featuredEvent?.posterUrl ? (
@@ -107,6 +118,7 @@ export function HomePage() {
                 </div>
               </div>
             </div>
+            )}
 
             {featuredEvents.length > 1 && (
               <>
