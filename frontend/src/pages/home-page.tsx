@@ -69,7 +69,7 @@ export function HomePage() {
   return (
     <>
       <section className="overflow-hidden bg-white px-4 pb-8 pt-9 sm:px-6 sm:pb-10 sm:pt-14">
-        <div className="mx-auto max-w-7xl" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)}>
+        <div className="mx-auto max-w-7xl" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onFocusCapture={() => setHeroPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setHeroPaused(false); }}>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-blue-700">Destaques DigiTicket</p>
             <h1 className="mt-3 text-4xl font-black uppercase leading-[0.95] tracking-[-0.065em] text-slate-950 sm:text-6xl lg:text-7xl">O momento é seu</h1>
@@ -112,7 +112,7 @@ export function HomePage() {
               <>
                 <button type="button" onClick={() => changeFeaturedEvent(-1)} aria-label="Evento anterior" className="absolute -left-2 top-[calc(50%-1.5rem)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-left-5"><ChevronLeft size={22} /></button>
                 <button type="button" onClick={() => changeFeaturedEvent(1)} aria-label="Próximo evento" className="absolute -right-2 top-[calc(50%-1.5rem)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-right-5"><ChevronRight size={22} /></button>
-                <div className="mt-4 flex items-center justify-center gap-2" aria-label="Escolher evento em destaque">{featuredEvents.map((event, index) => <button key={event.id} type="button" onClick={() => setFeaturedIndex(index)} aria-label={`Exibir ${event.title}`} className={`h-2.5 rounded-full transition-all ${index === featuredIndex ? 'w-8 bg-blue-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}`} />)}</div>
+                <div className="mt-4 flex items-center justify-center gap-2" aria-label="Escolher evento em destaque">{featuredEvents.map((event, index) => <button key={event.id} type="button" onClick={() => setFeaturedIndex(index)} aria-label={`Exibir ${event.title}`} aria-current={index === featuredIndex ? 'true' : undefined} className={`h-2.5 rounded-full transition-all ${index === featuredIndex ? 'w-8 bg-blue-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}`} />)}</div>
               </>
             )}
           </div>
@@ -122,9 +122,9 @@ export function HomePage() {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-6 py-5">
           <span className="mr-3 hidden text-xs font-bold uppercase tracking-[0.12em] text-slate-400 sm:block">Explorar</span>
-          <button type="button" onClick={() => updateFilter('category', '')} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold ${!filters.category ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>Todos</button>
+          <button type="button" aria-pressed={!filters.category} onClick={() => updateFilter('category', '')} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold ${!filters.category ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>Todos</button>
           {Object.entries(eventCategoryLabels).map(([value, label]) => (
-            <button key={value} type="button" onClick={() => updateFilter('category', value)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold ${filters.category === value ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{label}</button>
+            <button key={value} type="button" aria-pressed={filters.category === value} onClick={() => updateFilter('category', value)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold ${filters.category === value ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{label}</button>
           ))}
         </div>
       </section>
@@ -147,6 +147,7 @@ export function HomePage() {
 
         {eventsQuery.isPending && <LoadingState label="Carregando eventos" variant="cards" className="mt-8" />}
         {eventsQuery.isError && <div role="alert" className="mt-8 rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-700">Não foi possível carregar os eventos. Confirme se a API está em execução.</div>}
+        {eventsQuery.isSuccess && <p className="sr-only" role="status" aria-live="polite">{eventsQuery.data.length === 1 ? '1 evento encontrado' : `${eventsQuery.data.length} eventos encontrados`}</p>}
         {eventsQuery.isSuccess && eventsQuery.data.length === 0 && <EmptyState title="Nenhum evento encontrado" description="Tente remover ou alterar os filtros para ampliar a busca." className="mt-8" />}
         {eventsQuery.isSuccess && eventsQuery.data.length > 0 && <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{eventsQuery.data.map((event) => <EventCard key={event.id} event={event} />)}</div>}
       </section>

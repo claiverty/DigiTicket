@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
 
 interface MenuLink {
@@ -25,7 +25,9 @@ interface MenuLink {
 export function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -34,7 +36,10 @@ export function AppLayout() {
       if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
     };
     const closeWithKeyboard = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key === 'Escape' && menuOpen) {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
     };
     document.addEventListener('mousedown', closeMenu);
     document.addEventListener('keydown', closeWithKeyboard);
@@ -42,7 +47,11 @@ export function AppLayout() {
       document.removeEventListener('mousedown', closeMenu);
       document.removeEventListener('keydown', closeWithKeyboard);
     };
-  }, []);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname, location.hash]);
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -54,6 +63,7 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7f9fc] text-slate-900">
+      <a href="#conteudo-principal" className="skip-link">Pular para o conteúdo principal</a>
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center gap-4 px-5 sm:px-6">
           <Link className="flex shrink-0 items-center gap-2.5" to="/">
@@ -83,6 +93,7 @@ export function AppLayout() {
 
           <div className="relative ml-auto md:ml-2" ref={menuRef}>
             <button
+              ref={menuButtonRef}
               type="button"
               aria-label={`Menu da conta de ${user ? user.name.split(' ')[0] : 'visitante'}`}
               aria-expanded={menuOpen}
@@ -101,7 +112,7 @@ export function AppLayout() {
             </button>
 
             {menuOpen && (
-              <div role="menu" className="fixed right-4 top-[4.75rem] z-[60] max-h-[calc(100dvh-5.5rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-25px_rgba(15,23,42,0.35)] md:absolute md:right-0 md:top-[calc(100%+0.75rem)] md:max-h-[calc(100dvh-6rem)]">
+              <nav aria-label="Menu da conta" className="fixed right-4 top-[4.75rem] z-[60] max-h-[calc(100dvh-5.5rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-25px_rgba(15,23,42,0.35)] md:absolute md:right-0 md:top-[calc(100%+0.75rem)] md:max-h-[calc(100dvh-6rem)]">
                 <div className="bg-blue-600 px-5 py-5 text-white">
                   <div className="flex items-center gap-3">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15"><UserRound size={21} /></span>
@@ -115,27 +126,27 @@ export function AppLayout() {
 
                 <div className="p-2">
                   {menuLinks.map(({ label, to, icon: Icon }) => (
-                    <Link key={to} role="menuitem" to={to} onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
+                    <Link key={to} to={to} onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
                       <Icon size={18} className="text-slate-400" /> {label}
                     </Link>
                   ))}
-                  <Link role="menuitem" to="/#eventos" onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
+                  <Link to="/#eventos" onClick={closeMenu} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700">
                     <CircleHelp size={18} className="text-slate-400" /> Explorar eventos
                   </Link>
                 </div>
 
                 <div className="border-t border-slate-100 p-3">
                   {user ? (
-                    <button type="button" role="menuitem" onClick={() => { logout(); closeMenu(); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50">
+                    <button type="button" onClick={() => { logout(); closeMenu(); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50">
                       <LogOut size={18} /> Sair da conta
                     </button>
                   ) : (
-                    <Link role="menuitem" to="/cadastro" onClick={closeMenu} className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700">
+                    <Link to="/cadastro" onClick={closeMenu} className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700">
                       <UserPlus size={17} /> Criar conta grátis
                     </Link>
                   )}
                 </div>
-              </div>
+              </nav>
             )}
           </div>
         </div>
@@ -146,7 +157,7 @@ export function AppLayout() {
         </form>
       </header>
 
-      <main className="flex-1"><Outlet /></main>
+      <main id="conteudo-principal" className="flex-1"><Outlet /></main>
 
       <footer className="mt-20 border-t border-slate-200 bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">

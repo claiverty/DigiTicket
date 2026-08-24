@@ -15,7 +15,24 @@ body { min-width: 320px; min-height: 100vh; margin: 0; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 button, a { transition-property: color, background-color, border-color, opacity, transform, box-shadow; transition-duration: 180ms; }
 ::selection { color: #fff; background: #2563eb; }
-:focus-visible { outline: 3px solid rgba(37, 99, 235, 0.3); outline-offset: 2px; }
+:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: #fff;
+  background: #0f172a;
+  font-size: 0.875rem;
+  font-weight: 800;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus { transform: translateY(0); }
+#conteudo-principal { scroll-margin-top: 6rem; }
 
 @keyframes hero-reveal {
   from { opacity: 0; transform: translateY(8px); }

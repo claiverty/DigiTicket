@@ -8,6 +8,21 @@ const roleLabels: Record<Role, string> = {
   GATE: 'Portaria',
 };
 
+const profileContent: Record<Role, { eyebrow: string; description: string }> = {
+  ORGANIZER: {
+    eyebrow: 'Perfil do organizador',
+    description: 'Confira seus dados e acesse a gestão dos seus eventos.',
+  },
+  CUSTOMER: {
+    eyebrow: 'Minha conta',
+    description: 'Confira seus dados e acesse seus ingressos, reservas e transferências.',
+  },
+  GATE: {
+    eyebrow: 'Perfil da portaria',
+    description: 'Confira seus dados e acesse a validação de ingressos dos eventos.',
+  },
+};
+
 export function ProfilePage() {
   const { user } = useAuth();
 
@@ -15,16 +30,18 @@ export function ProfilePage() {
     return null;
   }
 
+  const content = profileContent[user.role];
+
   return (
     <section className="mx-auto max-w-4xl px-6 py-16 lg:py-24">
       <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">
-        Sessão protegida
+        {content.eyebrow}
       </p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.045em] text-slate-950">
         Olá, {user.name}.
       </h1>
       <p className="mt-4 text-slate-500">
-        Esta página só é carregada após a API validar seu JWT.
+        {content.description}
       </p>
 
       <dl className="mt-10 grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2 sm:p-8">

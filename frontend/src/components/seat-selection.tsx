@@ -83,7 +83,8 @@ export function SeatSelection({ event }: { event: Event }) {
                             key={seat.id}
                             type="button"
                             title={`${seat.ticketType.name} · ${seat.rowLabel}${seat.seatNumber} · ${formatMoney(seat.ticketType.priceCents)}`}
-                            aria-label={`Assento ${seat.rowLabel}${seat.seatNumber}`}
+                            aria-label={`Assento ${seat.rowLabel}${seat.seatNumber}, ${seat.ticketType.name}, ${formatMoney(seat.ticketType.priceCents)}${unavailable ? ', indisponível' : isSelected ? ', selecionado' : ', disponível'}`}
+                            aria-pressed={unavailable ? undefined : isSelected}
                             disabled={unavailable}
                             onClick={() => toggleSeat(seat.id)}
                             className={`${seat.ticketType.seatDisplaySize === 'LARGE' ? 'h-12 w-12' : 'h-9 w-9'} rounded-lg text-xs font-semibold transition ${
@@ -113,7 +114,7 @@ export function SeatSelection({ event }: { event: Event }) {
       </div>
 
       <div className="mt-5 flex items-center justify-between gap-4">
-        <span className="text-sm text-slate-400">
+        <span className="text-sm text-slate-500" role="status" aria-live="polite">
           {selectedSeats.length ? selectedSeats.map((seat) => `${seat.rowLabel}${seat.seatNumber}`).join(', ') : 'Nenhum assento selecionado'}
         </span>
         <strong className="text-lg text-slate-950">{formatMoney(totalCents)}</strong>
@@ -137,5 +138,5 @@ export function SeatSelection({ event }: { event: Event }) {
 }
 
 function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="flex items-center gap-2"><span className={`h-3 w-3 rounded ${color}`} />{label}</span>;
+  return <span className="flex items-center gap-2"><span aria-hidden="true" className={`h-3 w-3 rounded ${color}`} />{label}</span>;
 }

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import { FormField } from '../components/form-field';
@@ -111,6 +111,8 @@ export function TicketTypesPage() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<TicketType | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const editTriggerRef = useRef<HTMLButtonElement | null>(null);
   const eventQuery = useQuery({
     queryKey: ['events', 'organizer', id],
     queryFn: () => getOrganizerEvent(id, token!),
@@ -151,16 +153,37 @@ export function TicketTypesPage() {
     if (!editing) return;
 
     const previousOverflow = document.body.style.overflow;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setEditing(null);
+    const handleDialogKeyboard = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setEditing(null);
+        return;
+      }
+
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusableElements = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href]',
+        ),
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements.at(-1);
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement?.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement?.focus();
+      }
     };
 
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('keydown', handleDialogKeyboard);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('keydown', handleDialogKeyboard);
+      editTriggerRef.current?.focus();
     };
   }, [editing]);
 
@@ -292,6 +315,7 @@ export function TicketTypesPage() {
                 key={preset.name}
                 type="button"
                 onClick={() => applyPreset(preset)}
+                aria-pressed={selectedTicketName === preset.name}
                 className={`rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition ${
                   selectedTicketName === preset.name
                     ? 'border-blue-300 bg-blue-50 text-blue-700'
@@ -307,10 +331,10 @@ export function TicketTypesPage() {
         </div>
       )}
       <FormField id="name" label="Nome" placeholder="Pista, VIP, Meia…" autoFocus={Boolean(editing)} error={errors.name?.message} {...register('name')} />
-      <label>
+      <label htmlFor="ticket-description">
         <span className="mb-2 block text-sm font-bold text-slate-700">Descrição (opcional)</span>
-        <textarea rows={3} {...register('description')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none focus:border-blue-500" />
-        {errors.description && <span className="mt-2 block text-sm text-rose-300">{errors.description.message}</span>}
+        <textarea id="ticket-description" rows={3} aria-invalid={Boolean(errors.description)} aria-describedby={errors.description ? 'ticket-description-error' : undefined} {...register('description')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none focus:border-blue-500" />
+        {errors.description && <span id="ticket-description-error" role="alert" className="mt-2 block text-sm text-rose-700">{errors.description.message}</span>}
       </label>
       <FormField
         id="priceReais"
@@ -361,13 +385,13 @@ export function TicketTypesPage() {
                     {ticketType.description && <p className="mt-2 line-clamp-1 text-sm text-slate-400">{ticketType.description}</p>}
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                       <p className="shrink-0 text-sm text-slate-600">{ticketType.availableQuantity} disponíveis de {ticketType.capacity} · {reserved} reservados</p>
-                      <div className="h-1.5 w-full max-w-52 overflow-hidden rounded-full bg-slate-100" aria-label={`${occupiedPercentage}% dos ingressos reservados`}>
+                      <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={occupiedPercentage} aria-label={`${occupiedPercentage}% dos ingressos reservados`} className="h-1.5 w-full max-w-52 overflow-hidden rounded-full bg-slate-100">
                         <div className="h-full rounded-full bg-blue-600 transition-[width]" style={{ width: `${occupiedPercentage}%` }} />
                       </div>
                     </div>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button type="button" onClick={() => setEditing(ticketType)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700">Editar</button>
+                    <button type="button" onClick={(event) => { editTriggerRef.current = event.currentTarget; setEditing(ticketType); }} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700">Editar</button>
                     <button type="button" onClick={() => void remove(ticketType)} disabled={reserved > 0 || deleteMutation.isPending} className="rounded-lg border border-rose-200 px-3 py-1.5 text-sm text-rose-700 disabled:cursor-not-allowed disabled:opacity-40">Excluir</button>
                   </div>
                 </div>
@@ -381,8 +405,8 @@ export function TicketTypesPage() {
 
       {editing && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6">
-          <button type="button" onClick={() => setEditing(null)} aria-label="Fechar edição" className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
-          <div role="dialog" aria-modal="true" aria-labelledby="ticket-form-title" className="relative max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl">
+          <div aria-hidden="true" onMouseDown={() => setEditing(null)} className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ticket-form-title" className="relative max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl">
             {ticketForm}
           </div>
         </div>
