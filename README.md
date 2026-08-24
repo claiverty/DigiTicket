@@ -2,11 +2,11 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 10.5 — carregamento por rota e imagens otimizadas no frontend.
+> Status atual: Fase 11 — MVP funcional, documentado e validado.
 
 ## Sobre
 
-O DigiTicket será desenvolvido de forma incremental. A prioridade é entregar primeiro o fluxo principal completo:
+O DigiTicket foi desenvolvido de forma incremental, priorizando primeiro o fluxo principal completo:
 
 ```text
 Organizador publica evento
@@ -130,6 +130,18 @@ Estas contas estão disponíveis no ambiente configurado:
 | Cliente | `cliente1@demo.com` | `Demo123!` |
 | Cliente | `cliente2@demo.com` | `Demo123!` |
 | Portaria | `portaria@demo.com` | `Demo123!` |
+
+## Demonstração do fluxo completo
+
+1. Entre como `organizador@demo.com`, crie um evento, configure ingressos por quantidade ou setores com assentos e publique.
+2. Entre como `cliente1@demo.com`, encontre o evento, selecione ingressos ou assentos e crie uma reserva.
+3. No checkout, escolha `Simular aprovação`. O sistema não solicita cartão nem realiza cobrança real.
+4. Abra `Meus ingressos`, selecione o evento e consulte o ingresso individual com QR Code e código manual.
+5. Entre como `portaria@demo.com`, selecione o evento e valide o ingresso por QR ou código manual.
+6. A primeira leitura deve liberar a entrada; a segunda deve informar que o ingresso já foi utilizado.
+7. Para os caminhos alternativos, use outro evento para conferir `EVENTO ERRADO`, informe um código inexistente para receber `INVÁLIDO` e simule uma recusa no checkout para verificar a devolução do estoque.
+
+O pagamento simulado é uma decisão de escopo: o DigiTicket demonstra o fluxo e as regras transacionais de uma bilheteria sem processar ou armazenar informações financeiras reais.
 
 ## Eventos
 
@@ -370,7 +382,19 @@ flowchart LR
     C --> D[(PostgreSQL / Supabase)]
 ```
 
-O frontend não acessará diretamente o banco. Regras críticas serão implementadas no backend e protegidas também por constraints e transações no PostgreSQL quando aplicável.
+O frontend não acessa diretamente o banco. Regras críticas são implementadas no backend e protegidas também por constraints e transações no PostgreSQL.
+
+## Decisões técnicas
+
+- **NestJS:** concentra autenticação, autorização e regras de negócio em módulos de domínio.
+- **Prisma:** mantém o modelo, as migrations e o acesso tipado ao PostgreSQL.
+- **Supabase:** hospeda o PostgreSQL; Auth, Functions e Data API não fazem parte da arquitetura.
+- **JWT e RBAC:** protegem as rotas dos papéis `ORGANIZER`, `CUSTOMER` e `GATE`.
+- **Valores em centavos:** evitam erros de ponto flutuante nos preços e totais.
+- **Transações e atualizações condicionais:** impedem estoque negativo, venda duplicada e dupla validação.
+- **QR assinado:** usa HMAC-SHA256; o banco permanece como fonte final da verdade.
+- **Pagamento simulado:** permite testar aprovação e recusa sem coletar dados financeiros.
+- **Carregamento por rota:** reduz o JavaScript necessário na abertura inicial do frontend.
 
 ## Tecnologias
 
@@ -423,6 +447,13 @@ O frontend não acessará diretamente o banco. Regras críticas serão implement
 ```
 
 ## Configuração local
+
+### Pré-requisitos
+
+- Node.js 20 ou superior e npm.
+- Projeto PostgreSQL no Supabase.
+- Chave da Ticketmaster somente para testar pesquisa e importação externa.
+- Navegador com acesso à câmera somente para testar o scanner; o código manual funciona como alternativa.
 
 ### Frontend
 
@@ -498,9 +529,25 @@ npm run seed
 
 O frontend continuará sem acessar o Supabase diretamente. Toda comunicação permanece no fluxo `Frontend → NestJS → Prisma → PostgreSQL`.
 
+## Preparação para publicação
+
+O provedor pode variar, mas a publicação deve preservar dois serviços separados: frontend estático e API NestJS. Antes de disponibilizar o sistema:
+
+1. gere segredos novos e diferentes para `JWT_SECRET` e `TICKET_SIGNING_SECRET`;
+2. configure `DATABASE_URL`, `DIRECT_URL` e `TICKETMASTER_API_KEY` somente no backend;
+3. defina `FRONTEND_URL` com a origem HTTPS exata do frontend;
+4. defina `VITE_API_URL` com a URL pública HTTPS da API antes de executar o build do frontend;
+5. execute `npm run prisma:migrate:deploy` no ambiente do backend;
+6. configure o host do frontend para redirecionar rotas desconhecidas ao `index.html`;
+7. use `npm run build` no frontend e no backend e inicie a API com `npm run start:prod`;
+8. configure o monitoramento do endpoint `/api/health`;
+9. mantenha HTTPS, necessário também para o acesso à câmera fora de `localhost`.
+
+O seed cria contas e dados de demonstração. Ele é adequado para avaliação do projeto, mas não deve ser executado em um ambiente destinado a usuários reais.
+
 ## Qualidade e tratamento de erros
 
-Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação.
+Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **55 testes unitários em 16 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
 
 Erros HTTP usam uma resposta consistente, permitindo que o frontend apresente mensagens úteis sem depender de formatos diferentes entre módulos:
 
@@ -541,13 +588,14 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Revisão final dos fluxos, documentação e preparação para deploy.
-2. Editor visual avançado para plantas irregulares e múltiplos corredores.
-3. Monitoramento, rotação de segredos e reforços adicionais para produção.
+1. Reorganização incremental do frontend por funcionalidades e layouts de papel.
+2. Design system centralizado conforme padrões reais de repetição.
+3. Editor visual avançado para plantas irregulares e múltiplos corredores.
+4. Monitoramento, rotação de segredos e reforços adicionais para produção.
 
 ## Limitações atuais
 
-- Pagamentos são inteiramente simulados e não realizam cobrança financeira.
+- Pagamentos são intencionalmente simulados e não realizam cobrança financeira, conforme o objetivo de demonstração do projeto.
 - A transferência é gratuita e não inclui anúncio, preço ou revenda entre usuários.
 - O mapa atual usa um grid simples; ele não representa plantas irregulares, mesas ou corredores personalizados.
 - A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
