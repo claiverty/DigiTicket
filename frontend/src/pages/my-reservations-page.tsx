@@ -102,7 +102,7 @@ function ReservationCard({
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="grid sm:grid-cols-[12rem_1fr]">
         <div className="min-h-40 bg-blue-50">
-          {reservation.event.posterUrl && <img src={reservation.event.posterUrl} alt="" className="h-full w-full object-cover opacity-70" />}
+          {reservation.event.posterUrl && <img src={reservation.event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-70" />}
         </div>
         <div className="p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

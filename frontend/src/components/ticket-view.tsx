@@ -13,7 +13,7 @@ export function TicketView({ ticket }: { ticket: TicketDisplay }) {
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_30px_90px_-55px_rgba(15,23,42,0.55)]">
       <div className="relative h-64 bg-[#102856] sm:h-72">
-        {ticket.event.posterUrl && <img src={ticket.event.posterUrl} alt="" className="h-full w-full object-cover" />}
+        {ticket.event.posterUrl && <img src={ticket.event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[#071a3d] via-[#071a3d]/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
           <span className="rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700">{statusLabels[ticket.status]}</span>

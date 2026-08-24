@@ -99,7 +99,7 @@ export function MyTicketsPage() {
             >
               <div className="relative h-36 shrink-0 overflow-hidden bg-[#102856] sm:h-auto sm:w-52">
                 {group.event.posterUrl ? (
-                  <img src={group.event.posterUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={group.event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 ) : (
                   <TicketIcon className="absolute bottom-5 left-5 text-blue-300" size={30} />
                 )}

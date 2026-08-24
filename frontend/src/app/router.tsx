@@ -1,80 +1,90 @@
+import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../layouts/app-layout';
-import { HomePage } from '../pages/home-page';
-import { LoginPage } from '../pages/login-page';
-import { RegisterPage } from '../pages/register-page';
-import { ProfilePage } from '../pages/profile-page';
 import { ProtectedRoute } from '../components/protected-route';
 import { RoleRoute } from '../components/role-route';
-import { EventDetailsPage } from '../pages/event-details-page';
-import { OrganizerDashboardPage } from '../pages/organizer-dashboard-page';
-import { EventFormPage } from '../pages/event-form-page';
-import { TicketTypesPage } from '../pages/ticket-types-page';
-import { MyReservationsPage } from '../pages/my-reservations-page';
-import { CheckoutPage } from '../pages/checkout-page';
-import { MyTicketsPage } from '../pages/my-tickets-page';
-import { TicketDetailsPage } from '../pages/ticket-details-page';
-import { SharedTicketPage } from '../pages/shared-ticket-page';
-import { GatePage } from '../pages/gate-page';
-import { TicketTransfersPage } from '../pages/ticket-transfers-page';
-import { ExternalEventsPage } from '../pages/external-events-page';
-import { SeatMapPage } from '../pages/seat-map-page';
+
+const HomePage = lazy(() => import('../pages/home-page').then((module) => ({ default: module.HomePage })));
+const LoginPage = lazy(() => import('../pages/login-page').then((module) => ({ default: module.LoginPage })));
+const RegisterPage = lazy(() => import('../pages/register-page').then((module) => ({ default: module.RegisterPage })));
+const ProfilePage = lazy(() => import('../pages/profile-page').then((module) => ({ default: module.ProfilePage })));
+const EventDetailsPage = lazy(() => import('../pages/event-details-page').then((module) => ({ default: module.EventDetailsPage })));
+const OrganizerDashboardPage = lazy(() => import('../pages/organizer-dashboard-page').then((module) => ({ default: module.OrganizerDashboardPage })));
+const EventFormPage = lazy(() => import('../pages/event-form-page').then((module) => ({ default: module.EventFormPage })));
+const TicketTypesPage = lazy(() => import('../pages/ticket-types-page').then((module) => ({ default: module.TicketTypesPage })));
+const MyReservationsPage = lazy(() => import('../pages/my-reservations-page').then((module) => ({ default: module.MyReservationsPage })));
+const CheckoutPage = lazy(() => import('../pages/checkout-page').then((module) => ({ default: module.CheckoutPage })));
+const MyTicketsPage = lazy(() => import('../pages/my-tickets-page').then((module) => ({ default: module.MyTicketsPage })));
+const TicketDetailsPage = lazy(() => import('../pages/ticket-details-page').then((module) => ({ default: module.TicketDetailsPage })));
+const SharedTicketPage = lazy(() => import('../pages/shared-ticket-page').then((module) => ({ default: module.SharedTicketPage })));
+const GatePage = lazy(() => import('../pages/gate-page').then((module) => ({ default: module.GatePage })));
+const TicketTransfersPage = lazy(() => import('../pages/ticket-transfers-page').then((module) => ({ default: module.TicketTransfersPage })));
+const ExternalEventsPage = lazy(() => import('../pages/external-events-page').then((module) => ({ default: module.ExternalEventsPage })));
+const SeatMapPage = lazy(() => import('../pages/seat-map-page').then((module) => ({ default: module.SeatMapPage })));
+
+function loadPage(page: ReactNode) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-20 text-sm font-semibold text-slate-500">Carregando página…</div>}>
+      {page}
+    </Suspense>
+  );
+}
 
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'eventos/:slug', element: <EventDetailsPage /> },
-      { path: 'entrar', element: <LoginPage /> },
-      { path: 'cadastro', element: <RegisterPage /> },
+      { index: true, element: loadPage(<HomePage />) },
+      { path: 'eventos/:slug', element: loadPage(<EventDetailsPage />) },
+      { path: 'entrar', element: loadPage(<LoginPage />) },
+      { path: 'cadastro', element: loadPage(<RegisterPage />) },
       {
         path: 'ingresso/compartilhado/:shareToken',
-        element: <SharedTicketPage />,
+        element: loadPage(<SharedTicketPage />),
       },
       {
         element: <ProtectedRoute />,
         children: [
-          { path: 'perfil', element: <ProfilePage /> },
+          { path: 'perfil', element: loadPage(<ProfilePage />) },
           {
             element: <RoleRoute allowedRoles={['CUSTOMER']} />,
             children: [
-              { path: 'minhas-reservas', element: <MyReservationsPage /> },
-              { path: 'checkout/:id', element: <CheckoutPage /> },
-              { path: 'meus-ingressos', element: <MyTicketsPage /> },
-              { path: 'transferencias', element: <TicketTransfersPage /> },
+              { path: 'minhas-reservas', element: loadPage(<MyReservationsPage />) },
+              { path: 'checkout/:id', element: loadPage(<CheckoutPage />) },
+              { path: 'meus-ingressos', element: loadPage(<MyTicketsPage />) },
+              { path: 'transferencias', element: loadPage(<TicketTransfersPage />) },
               {
                 path: 'meus-ingressos/:id',
-                element: <TicketDetailsPage />,
+                element: loadPage(<TicketDetailsPage />),
               },
             ],
           },
           {
             element: <RoleRoute allowedRoles={['ORGANIZER']} />,
             children: [
-              { path: 'organizador', element: <OrganizerDashboardPage /> },
+              { path: 'organizador', element: loadPage(<OrganizerDashboardPage />) },
               {
                 path: 'organizador/importar-eventos',
-                element: <ExternalEventsPage />,
+                element: loadPage(<ExternalEventsPage />),
               },
-              { path: 'organizador/eventos/novo', element: <EventFormPage /> },
+              { path: 'organizador/eventos/novo', element: loadPage(<EventFormPage />) },
               {
                 path: 'organizador/eventos/:id/editar',
-                element: <EventFormPage />,
+                element: loadPage(<EventFormPage />),
               },
               {
                 path: 'organizador/eventos/:id/ingressos',
-                element: <TicketTypesPage />,
+                element: loadPage(<TicketTypesPage />),
               },
               {
                 path: 'organizador/eventos/:id/assentos',
-                element: <SeatMapPage />,
+                element: loadPage(<SeatMapPage />),
               },
             ],
           },
           {
             element: <RoleRoute allowedRoles={['GATE']} />,
-            children: [{ path: 'portaria', element: <GatePage /> }],
+            children: [{ path: 'portaria', element: loadPage(<GatePage />) }],
           },
         ],
       },

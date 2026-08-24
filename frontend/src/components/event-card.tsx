@@ -16,7 +16,7 @@ export function EventCard({ event }: EventCardProps) {
       <Link className="block" to={`/eventos/${event.slug}`} aria-label={`Ver detalhes de ${event.title}`}>
         <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-slate-100">
           {event.posterUrl ? (
-            <img src={event.posterUrl} alt={`Cartaz do evento ${event.title}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+            <img src={event.posterUrl} alt={`Cartaz do evento ${event.title}`} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
           ) : (
             <div className="relative flex h-full items-end overflow-hidden bg-[#0a1d45] p-5 text-white">
               <span className="absolute -right-10 -top-12 h-40 w-40 rounded-full border-[28px] border-blue-500/30" />

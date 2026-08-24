@@ -191,7 +191,7 @@ function ExternalEventCard({
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="aspect-[16/9] bg-blue-50">
         {event.imageUrl ? (
-          <img src={event.imageUrl} alt="" className="h-full w-full object-cover" />
+          <img src={event.imageUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-500">Imagem não disponível</div>
         )}

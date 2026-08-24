@@ -80,7 +80,7 @@ export function HomePage() {
             <div key={featuredEvent?.id ?? 'fallback'} className="hero-slide grid gap-1.5 lg:grid-cols-2" aria-live="polite">
               <div className="relative min-h-[19rem] overflow-hidden rounded-t-[1.5rem] bg-slate-100 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none">
                 {featuredEvent?.posterUrl ? (
-                  <img src={featuredEvent.posterUrl} alt={`Evento em destaque: ${featuredEvent.title}`} className="absolute inset-0 h-full w-full object-cover" />
+                  <img src={featuredEvent.posterUrl} alt={`Evento em destaque: ${featuredEvent.title}`} loading="eager" fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(145deg,#dbeafe_0%,#60a5fa_100%)]"><span className="absolute -right-12 -top-14 h-56 w-56 rounded-full border-[3rem] border-white/25" /><span className="absolute bottom-8 left-8 max-w-xs text-3xl font-black uppercase leading-none tracking-[-0.05em] text-blue-950">Seu próximo evento começa aqui</span></div>
                 )}

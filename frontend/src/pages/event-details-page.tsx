@@ -44,7 +44,7 @@ export function EventDetailsPage() {
     <article>
       <div className="relative h-[26rem] overflow-hidden bg-blue-100 sm:h-[32rem]">
         {event.posterUrl && (
-          <img src={event.posterUrl} alt="" className="h-full w-full object-cover" />
+          <img src={event.posterUrl} alt="" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-6 pb-10 sm:pb-14">

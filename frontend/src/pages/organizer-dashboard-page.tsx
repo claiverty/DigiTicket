@@ -121,7 +121,7 @@ export function OrganizerDashboardPage() {
             <article key={event.id} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_-34px_rgba(15,23,42,0.45)]">
               <div className="grid lg:grid-cols-[9rem_1fr_auto] lg:items-stretch">
                 <div className="relative hidden min-h-36 overflow-hidden bg-[#102856] lg:block">
-                  {event.posterUrl ? <img src={event.posterUrl} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <><span className="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[1.75rem] border-blue-400/20" /><CalendarCheck2 className="absolute bottom-5 left-5 text-blue-300" size={25} /></>}
+                  {event.posterUrl ? <img src={event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <><span className="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[1.75rem] border-blue-400/20" /><CalendarCheck2 className="absolute bottom-5 left-5 text-blue-300" size={25} /></>}
                 </div>
                 <div className="min-w-0 p-5 sm:p-6">
                   <div className="flex flex-wrap items-center gap-2">

@@ -2,7 +2,7 @@
 
 Plataforma full-stack para publicação de eventos, venda de ingressos e validação de entrada na portaria.
 
-> Status atual: Fase 10.4 — acessibilidade essencial e navegação por teclado revisadas.
+> Status atual: Fase 10.5 — carregamento por rota e imagens otimizadas no frontend.
 
 ## Sobre
 
@@ -105,6 +105,9 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Menu da conta e modal de edição operáveis por teclado, com fechamento por `Esc` e retorno correto do foco.
 - Estados selecionados, resultados de busca, ocupação de ingressos e assentos comunicados a leitores de tela.
 - Carrossel pausado durante interação por mouse ou teclado e animações reduzidas conforme a preferência do sistema.
+- Páginas carregadas sob demanda, reduzindo o JavaScript necessário na abertura inicial.
+- Imagens secundárias com carregamento tardio e decodificação assíncrona.
+- Imagens principais do evento priorizadas para preservar a velocidade percebida da página.
 - Identidade visual própria em branco e azul, com tipografia Manrope e ícones Lucide.
 - Landing page responsiva com destaques rotativos dos eventos publicados, categorias e busca integrada.
 - Busca pública por título, descrição, local ou cidade sem diferenciar maiúsculas e acentos.
@@ -538,9 +541,9 @@ npm run build
 
 As próximas funcionalidades serão adicionadas e documentadas por fase:
 
-1. Divisão do bundle do frontend por rota para reduzir o carregamento inicial.
-2. Otimização de imagens e carregamento das páginas mais pesadas.
-3. Editor visual avançado para plantas irregulares e múltiplos corredores.
+1. Revisão final dos fluxos, documentação e preparação para deploy.
+2. Editor visual avançado para plantas irregulares e múltiplos corredores.
+3. Monitoramento, rotação de segredos e reforços adicionais para produção.
 
 ## Limitações atuais
 
