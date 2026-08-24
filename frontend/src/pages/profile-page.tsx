@@ -33,11 +33,11 @@ export function ProfilePage() {
   const content = profileContent[user.role];
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-16 lg:py-24">
+    <section className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-16 lg:py-24">
       <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">
         {content.eyebrow}
       </p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.045em] text-slate-950">
+      <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] text-slate-950 sm:text-4xl">
         Olá, {user.name}.
       </h1>
       <p className="mt-4 text-slate-500">
@@ -63,22 +63,22 @@ export function ProfilePage() {
         </Link>
       )}
       {user.role === 'CUSTOMER' && (
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
           <Link
             to="/minhas-reservas"
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center font-bold text-slate-700"
           >
             Ver minhas reservas
           </Link>
           <Link
             to="/meus-ingressos"
-            className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-3 text-center font-bold text-white hover:bg-blue-700"
           >
             Abrir meus ingressos
           </Link>
           <Link
             to="/transferencias"
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center font-bold text-slate-700"
           >
             Ver transferências
           </Link>

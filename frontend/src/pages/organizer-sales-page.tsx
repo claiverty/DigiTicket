@@ -45,14 +45,14 @@ export function OrganizerSalesPage() {
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-12">
-      <nav className="hide-scrollbar mb-6 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5" aria-label="Atalhos do organizador">
+      <nav className="hide-scrollbar mb-4 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 sm:mb-6" aria-label="Atalhos do organizador">
         <Link to="/organizador" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Visão geral</Link>
         <Link to="/organizador/vendas" className="shrink-0 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Vendas</Link>
         <Link to="/organizador/eventos/novo" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Criar evento</Link>
         <Link to="/organizador/importar-eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Importar</Link>
       </nav>
 
-      <div className="rounded-[1.75rem] bg-[#071a3d] px-6 py-8 text-white sm:px-9 sm:py-10">
+      <div className="rounded-3xl bg-[#071a3d] px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-300">Desempenho dos eventos</p>
         <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] sm:text-5xl">Vendas e reservas</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100/70">Acompanhe os resultados simulados e as movimentações dos seus eventos.</p>
@@ -63,7 +63,7 @@ export function OrganizerSalesPage() {
 
       {overview && (
         <>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4 xl:grid-cols-4">
             <SalesMetric label="Reservas" value={String(overview.summary.reservationCount)} icon={ReceiptText} />
             <SalesMetric label="Reservas pagas" value={String(overview.summary.paidReservationCount)} icon={CheckCircle2} />
             <SalesMetric label="Ingressos vendidos" value={String(overview.summary.ticketsSold)} icon={TicketCheck} accent />
@@ -81,7 +81,7 @@ export function OrganizerSalesPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700">{eventStatusLabels[event.status]}</span>
-                      <h3 className="mt-2 truncate text-lg font-extrabold text-slate-950">{event.title}</h3>
+                      <h3 className="mt-2 line-clamp-2 text-lg font-extrabold text-slate-950">{event.title}</h3>
                       <p className="mt-1 text-xs text-slate-500">{formatEventDate(event.startDate)} · {event.city}/{event.state}</p>
                     </div>
                     <Link to={event.status === 'PUBLISHED' ? `/eventos/${event.slug}` : `/organizador/eventos/${event.id}/editar`} className="shrink-0 text-sm font-bold text-blue-700">Abrir →</Link>
@@ -169,10 +169,10 @@ export function OrganizerSalesPage() {
 
 function SalesMetric({ label, value, icon: Icon, accent = false }: { label: string; value: string; icon: LucideIcon; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-5 ${accent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-950'}`}>
-      <div className="flex items-start justify-between gap-4">
-        <div><p className={`text-xs font-bold ${accent ? 'text-blue-100' : 'text-slate-500'}`}>{label}</p><p className="mt-2 text-2xl font-extrabold tracking-[-0.04em]">{value}</p></div>
-        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700'}`}><Icon size={19} /></span>
+    <div className={`rounded-2xl border p-3.5 sm:p-5 ${accent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-950'}`}>
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
+        <div className="min-w-0"><p className={`text-[10px] font-bold leading-tight sm:text-xs ${accent ? 'text-blue-100' : 'text-slate-500'}`}>{label}</p><p className="mt-1.5 break-words text-xl font-extrabold tracking-[-0.04em] sm:mt-2 sm:text-2xl">{value}</p></div>
+        <span className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex ${accent ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700'}`}><Icon size={19} /></span>
       </div>
     </div>
   );

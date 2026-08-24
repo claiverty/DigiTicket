@@ -160,19 +160,35 @@ export function AppLayout() {
 
       <main id="conteudo-principal" className="flex-1"><Outlet /></main>
 
-      <footer className="mt-20 border-t border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
+      <footer className="mt-12 border-t border-slate-200 bg-white sm:mt-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-6 sm:py-14 md:grid-cols-[1.4fr_1fr_1fr] md:gap-10">
           <div>
             <Link className="flex items-center gap-2.5" to="/"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white"><Ticket size={19} /></span><span className="text-xl font-extrabold tracking-[-0.04em] text-slate-950">Digi<span className="text-blue-600">Ticket</span></span></Link>
             <p className="mt-5 max-w-sm text-sm leading-6 text-slate-500">Eventos, ingressos e experiências em um fluxo simples para quem organiza e para quem participa.</p>
           </div>
-          <div><p className="text-sm font-bold text-slate-950">Explore</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/"><span className="inline-flex items-center gap-2"><CalendarDays size={16} /> Próximos eventos</span></Link><Link className="hover:text-blue-600" to="/meus-ingressos"><span className="inline-flex items-center gap-2"><Ticket size={16} /> Meus ingressos</span></Link></div></div>
-          <div><p className="text-sm font-bold text-slate-950">Para profissionais</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/organizador">Painel do organizador</Link><Link className="hover:text-blue-600" to="/portaria"><span className="inline-flex items-center gap-2"><ScanLine size={16} /> Acesso da portaria</span></Link></div></div>
+          <FooterLinks role={user?.role} />
         </div>
         <div className="border-t border-slate-100"><div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} DigiTicket.</p><p>Feito para experiências que valem a entrada.</p></div></div>
       </footer>
     </div>
   );
+}
+
+function FooterLinks({ role }: { role?: string }) {
+  const common = (
+    <div>
+      <p className="text-sm font-bold text-slate-950">Explore</p>
+      <div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500">
+        <Link className="hover:text-blue-600" to="/#eventos"><span className="inline-flex items-center gap-2"><CalendarDays size={16} /> Próximos eventos</span></Link>
+        {role && <Link className="hover:text-blue-600" to="/perfil"><span className="inline-flex items-center gap-2"><UserRound size={16} /> Meu perfil</span></Link>}
+      </div>
+    </div>
+  );
+
+  if (role === 'CUSTOMER') return <>{common}<div><p className="text-sm font-bold text-slate-950">Minha conta</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/meus-ingressos"><span className="inline-flex items-center gap-2"><Ticket size={16} /> Meus ingressos</span></Link><Link className="hover:text-blue-600" to="/minhas-reservas">Minhas reservas</Link><Link className="hover:text-blue-600" to="/transferencias">Transferências</Link></div></div></>;
+  if (role === 'ORGANIZER') return <>{common}<div><p className="text-sm font-bold text-slate-950">Organização</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/organizador">Painel do organizador</Link><Link className="hover:text-blue-600" to="/organizador/vendas"><span className="inline-flex items-center gap-2"><BarChart3 size={16} /> Vendas e reservas</span></Link><Link className="hover:text-blue-600" to="/organizador/eventos/novo">Criar evento</Link></div></div></>;
+  if (role === 'GATE') return <>{common}<div><p className="text-sm font-bold text-slate-950">Portaria</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/portaria"><span className="inline-flex items-center gap-2"><ScanLine size={16} /> Validar ingresso</span></Link></div></div></>;
+  return <>{common}<div><p className="text-sm font-bold text-slate-950">Sua conta</p><div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500"><Link className="hover:text-blue-600" to="/entrar">Entrar</Link><Link className="hover:text-blue-600" to="/cadastro">Criar conta</Link></div></div></>;
 }
 
 function getMenuLinks(role?: string): MenuLink[] {

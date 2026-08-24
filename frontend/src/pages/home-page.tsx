@@ -5,6 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { EmptyState } from '../components/empty-state';
 import { EventCard } from '../components/event-card';
 import { LoadingState } from '../components/loading-state';
+import { useAuth } from '../hooks/use-auth';
 import { getPublishedEvents } from '../services/event-service';
 import type { EventFilters } from '../types/event';
 import { eventCategoryLabels, formatEventDate } from '../utils/event-formatters';
@@ -17,6 +18,7 @@ const heroThemes = [
 ];
 
 export function HomePage() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const searchFromHeader = searchParams.get('busca') ?? '';
   const [filters, setFilters] = useState<EventFilters>({ search: searchFromHeader });
@@ -79,8 +81,8 @@ export function HomePage() {
           <div className="relative mx-auto mt-7 max-w-6xl sm:mt-9">
             {featuredQuery.isPending ? (
               <div className="grid animate-pulse gap-1.5 lg:grid-cols-2" role="status" aria-label="Carregando evento em destaque">
-                <div className="min-h-[19rem] rounded-t-[1.5rem] bg-slate-200 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none" />
-                <div className="flex min-h-[21rem] flex-col justify-between rounded-b-[1.5rem] bg-slate-900 p-7 sm:min-h-[27rem] sm:p-10 lg:min-h-[31rem] lg:rounded-r-[1.5rem] lg:rounded-bl-none lg:p-12">
+                <div className="min-h-[13rem] rounded-t-[1.5rem] bg-slate-200 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none" />
+                <div className="flex min-h-[17rem] flex-col justify-between rounded-b-[1.5rem] bg-slate-900 p-5 sm:min-h-[27rem] sm:p-10 lg:min-h-[31rem] lg:rounded-r-[1.5rem] lg:rounded-bl-none lg:p-12">
                   <div className="space-y-5"><div className="h-3 w-28 rounded-full bg-white/20" /><div className="h-12 w-4/5 rounded-xl bg-white/15" /><div className="h-12 w-3/5 rounded-xl bg-white/15" /></div>
                   <div className="space-y-3"><div className="h-4 w-2/3 rounded-full bg-white/15" /><div className="h-4 w-1/2 rounded-full bg-white/15" /></div>
                   <div className="flex items-end justify-between"><div className="h-12 w-20 rounded-lg bg-white/15" /><div className="h-11 w-32 rounded-full bg-white/20" /></div>
@@ -89,7 +91,7 @@ export function HomePage() {
               </div>
             ) : (
             <div key={featuredEvent?.id ?? 'fallback'} className="hero-slide grid gap-1.5 lg:grid-cols-2" aria-live="polite">
-              <div className="relative min-h-[19rem] overflow-hidden rounded-t-[1.5rem] bg-slate-100 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none">
+              <div className="relative min-h-[13rem] overflow-hidden rounded-t-[1.5rem] bg-slate-100 sm:min-h-[27rem] lg:min-h-[31rem] lg:rounded-l-[1.5rem] lg:rounded-tr-none">
                 {featuredEvent?.posterUrl ? (
                   <img src={featuredEvent.posterUrl} alt={`Evento em destaque: ${featuredEvent.title}`} loading="eager" fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                 ) : (
@@ -98,15 +100,15 @@ export function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent" />
               </div>
 
-              <div className="relative flex min-h-[21rem] flex-col justify-between overflow-hidden rounded-b-[1.5rem] p-7 sm:min-h-[27rem] sm:p-10 lg:min-h-[31rem] lg:rounded-r-[1.5rem] lg:rounded-bl-none lg:p-12" style={{ backgroundColor: heroTheme.background, color: heroTheme.foreground }}>
+              <div className="relative flex min-h-[17rem] flex-col justify-between overflow-hidden rounded-b-[1.5rem] p-5 sm:min-h-[27rem] sm:p-10 lg:min-h-[31rem] lg:rounded-r-[1.5rem] lg:rounded-bl-none lg:p-12" style={{ backgroundColor: heroTheme.background, color: heroTheme.foreground }}>
                 <span className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full border-[3.5rem] opacity-10" style={{ borderColor: heroTheme.accent }} />
                 <div className="relative">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">{featuredEvent ? eventCategoryLabels[featuredEvent.category] : 'Agenda DigiTicket'}</p>
-                  <h2 className="mt-5 max-w-lg text-4xl font-black uppercase leading-[0.94] tracking-[-0.055em] sm:text-5xl lg:text-6xl">{featuredEvent?.title ?? 'Viva algo novo'}</h2>
+                  <h2 className="mt-3 max-w-lg text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] sm:mt-5 sm:text-5xl lg:text-6xl">{featuredEvent?.title ?? 'Viva algo novo'}</h2>
                 </div>
 
                 {featuredEvent ? (
-                  <div className="relative my-8 space-y-2 text-sm font-bold opacity-85">
+                  <div className="relative my-5 space-y-2 text-xs font-bold opacity-85 sm:my-8 sm:text-sm">
                     <p className="flex items-center gap-2"><MapPin size={16} /> {featuredEvent.venueName} · {featuredEvent.city}/{featuredEvent.state}</p>
                     <p className="flex items-center gap-2"><CalendarDays size={16} /> {formatEventDate(featuredEvent.startDate)}</p>
                   </div>
@@ -122,8 +124,8 @@ export function HomePage() {
 
             {featuredEvents.length > 1 && (
               <>
-                <button type="button" onClick={() => changeFeaturedEvent(-1)} aria-label="Evento anterior" className="absolute -left-2 top-[calc(50%-1.5rem)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-left-5"><ChevronLeft size={22} /></button>
-                <button type="button" onClick={() => changeFeaturedEvent(1)} aria-label="Próximo evento" className="absolute -right-2 top-[calc(50%-1.5rem)] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-right-5"><ChevronRight size={22} /></button>
+                <button type="button" onClick={() => changeFeaturedEvent(-1)} aria-label="Evento anterior" className="absolute -left-2 top-20 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-left-5 sm:top-48 lg:top-[calc(50%-1.5rem)]"><ChevronLeft size={22} /></button>
+                <button type="button" onClick={() => changeFeaturedEvent(1)} aria-label="Próximo evento" className="absolute -right-2 top-20 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_12px_35px_-12px_rgba(15,23,42,0.5)] hover:scale-105 sm:-right-5 sm:top-48 lg:top-[calc(50%-1.5rem)]"><ChevronRight size={22} /></button>
                 <div className="mt-4 flex items-center justify-center gap-2" aria-label="Escolher evento em destaque">{featuredEvents.map((event, index) => <button key={event.id} type="button" onClick={() => setFeaturedIndex(index)} aria-label={`Exibir ${event.title}`} aria-current={index === featuredIndex ? 'true' : undefined} className={`h-2.5 rounded-full transition-all ${index === featuredIndex ? 'w-8 bg-blue-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}`} />)}</div>
               </>
             )}
@@ -164,10 +166,9 @@ export function HomePage() {
         {eventsQuery.isSuccess && eventsQuery.data.length > 0 && <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{eventsQuery.data.map((event) => <EventCard key={event.id} event={event} />)}</div>}
       </section>
 
-      <section className="mx-auto max-w-7xl px-6">
+      <section className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-slate-950 px-7 py-9 text-white sm:flex-row sm:items-center sm:px-10">
-          <div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-300">Organiza eventos?</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em]">Crie, publique e gerencie tudo pelo DigiTicket.</h2></div>
-          <Link className="shrink-0 rounded-lg bg-white px-5 py-3 text-sm font-extrabold text-slate-950 hover:bg-blue-50" to="/cadastro">Começar agora</Link>
+          {user?.role === 'ORGANIZER' ? <><div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-300">Seus eventos</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em]">Continue organizando experiências pelo DigiTicket.</h2></div><Link className="shrink-0 rounded-lg bg-white px-5 py-3 text-sm font-extrabold text-slate-950 hover:bg-blue-50" to="/organizador">Abrir painel</Link></> : <><div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-300">Sua próxima experiência</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em]">Encontre um evento que combine com você.</h2></div><Link className="shrink-0 rounded-lg bg-white px-5 py-3 text-sm font-extrabold text-slate-950 hover:bg-blue-50" to="/#eventos">Explorar eventos</Link></>}
         </div>
       </section>
     </>

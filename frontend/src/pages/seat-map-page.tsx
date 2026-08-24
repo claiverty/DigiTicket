@@ -70,19 +70,21 @@ export function SeatMapPage() {
   const mutationError = saveMutation.error ?? deleteMutation.error;
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-14">
+    <section className="mx-auto max-w-6xl overflow-hidden px-4 py-8 sm:px-6 sm:py-14">
       <Link to="/organizador" className="text-sm font-bold text-blue-700">← Voltar aos eventos</Link>
-      <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.04em] text-slate-950">Mapa de {eventQuery.data.title}</h1>
+      <h1 className="mt-5 text-3xl font-extrabold tracking-[-0.04em] text-slate-950 sm:text-4xl">Mapa de {eventQuery.data.title}</h1>
       <p className="mt-3 text-slate-400">Crie setores; as fileiras e cadeiras serão numeradas automaticamente.</p>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_22rem]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          <div className="rounded-2xl bg-[#0b132b] p-5 text-white sm:p-7">
+      <div className="mt-8 grid min-w-0 gap-8 sm:mt-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+          <div className="min-w-0 rounded-2xl bg-[#0b132b] p-4 text-white sm:p-7">
           <div className="mx-auto mb-8 max-w-lg rounded-b-[50%] border-t-4 border-emerald-400 pt-3 text-center text-xs uppercase tracking-[0.25em] text-slate-400">Palco</div>
           {seats.length === 0 ? (
             <EmptyState title="Mapa ainda não configurado" description="Adicione o primeiro setor para gerar automaticamente as fileiras e os assentos." compact className="my-10" />
           ) : (
-            <div className="overflow-x-auto">
+            <div>
+              <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-wider text-blue-200 sm:hidden">Deslize para ver todos os assentos →</p>
+            <div className="max-w-full overflow-x-auto overscroll-x-contain pb-2">
               <div className="mx-auto w-max space-y-8">
                 {sections.map((section) => (
                   <div key={section.id}>
@@ -98,6 +100,7 @@ export function SeatMapPage() {
                   </div>
                 ))}
               </div>
+            </div>
             </div>
           )}
           </div>

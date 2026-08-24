@@ -123,7 +123,7 @@ Reservas vencidas são processadas de forma lazy ao consultar catálogo e reserv
 2. Crie ou edite um tipo de ingresso e confira preço, capacidade e disponibilidade.
 3. Saia e entre como `cliente1@demo.com`.
 4. Abra o `Festival Luzes da Cidade`, escolha quantidades e reserve.
-5. Abra `Minhas reservas` e confira itens, total calculado e contagem regressiva.
+5. Abra `Minhas reservas` e confira itens, total calculado e contagem regressiva. Reservas concluídas ou encerradas ficam disponíveis no botão `Ver histórico`.
 6. Cancele a reserva e confirme que a quantidade retorna ao catálogo.
 7. Para testar a expiração, deixe uma reserva vencer e atualize o catálogo ou a página de reservas após 10 minutos.
 
