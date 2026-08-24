@@ -70,8 +70,8 @@ export function OrganizerDashboardPage() {
   );
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-12">
-      <nav className="hide-scrollbar mb-6 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5" aria-label="Atalhos do organizador">
+    <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-12">
+      <nav className="hide-scrollbar mb-4 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 sm:mb-6" aria-label="Atalhos do organizador">
         <Link to="/organizador" className="shrink-0 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Visão geral</Link>
         <Link to="/organizador/vendas" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Vendas</Link>
         <Link to="/organizador/eventos/novo" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Criar evento</Link>
@@ -79,38 +79,38 @@ export function OrganizerDashboardPage() {
         <Link to="/#eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Ver catálogo</Link>
       </nav>
 
-      <div className="relative overflow-hidden rounded-[1.75rem] bg-[#071a3d] px-6 py-8 text-white sm:px-9 sm:py-10">
+      <div className="relative overflow-hidden rounded-3xl bg-[#071a3d] px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <span className="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[3.5rem] border-blue-500/15" />
-        <div className="relative flex flex-col gap-7 sm:flex-row sm:items-end sm:justify-between">
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-7">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-300">Central do organizador</p>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] sm:text-5xl">Seus eventos, em movimento.</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100/70">Crie experiências, prepare a venda e acompanhe cada publicação em um só lugar.</p>
+            <h1 className="mt-2 text-[1.75rem] font-extrabold leading-tight tracking-[-0.045em] sm:mt-3 sm:text-5xl">Seus eventos, em movimento.</h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100/70 sm:mt-3">Crie experiências, prepare a venda e acompanhe cada publicação em um só lugar.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/organizador/importar-eventos" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white hover:bg-white/15"><Upload size={17} /> Importar</Link>
-            <Link to="/organizador/eventos/novo" className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-blue-400"><Plus size={18} /> Criar evento</Link>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+            <Link to="/organizador/importar-eventos" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-bold text-white hover:bg-white/15 sm:px-5 sm:py-3"><Upload size={17} /> Importar</Link>
+            <Link to="/organizador/eventos/novo" className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-blue-400 sm:px-5 sm:py-3"><Plus size={18} /> Criar evento</Link>
           </div>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-3">
-        <Metric label="Total de eventos" value={events.length} icon={CalendarDays} />
-        <Metric label="Publicados" value={publishedCount} icon={TicketCheck} accent />
-        <Metric label="Em preparação" value={draftCount} icon={FilePenLine} />
+      <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-4">
+        <Metric label="Total de eventos" value={events.length} icon={CalendarDays} compact />
+        <Metric label="Publicados" value={publishedCount} icon={TicketCheck} accent compact />
+        <Metric label="Em preparação" value={draftCount} icon={FilePenLine} compact />
       </div>
 
       {salesQuery.data && (
-        <div className="mt-8">
+        <div className="mt-7 sm:mt-8">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Resultados comerciais</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950">Resumo das vendas</h2></div>
             <Link to="/organizador/vendas" className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700">Ver detalhes <ArrowUpRight size={15} /></Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Reservas" value={salesQuery.data.summary.reservationCount} icon={ReceiptText} />
-            <Metric label="Reservas pagas" value={salesQuery.data.summary.paidReservationCount} icon={BarChart3} />
-            <Metric label="Ingressos vendidos" value={salesQuery.data.summary.ticketsSold} icon={TicketCheck} accent />
-            <Metric label="Receita simulada" value={formatMoney(salesQuery.data.summary.simulatedRevenueCents)} icon={Banknote} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+            <Metric label="Reservas" value={salesQuery.data.summary.reservationCount} icon={ReceiptText} compact />
+            <Metric label="Reservas pagas" value={salesQuery.data.summary.paidReservationCount} icon={BarChart3} compact />
+            <Metric label="Ingressos vendidos" value={salesQuery.data.summary.ticketsSold} icon={TicketCheck} accent compact />
+            <Metric label="Receita simulada" value={formatMoney(salesQuery.data.summary.simulatedRevenueCents)} icon={Banknote} compact />
           </div>
         </div>
       )}
@@ -138,7 +138,7 @@ export function OrganizerDashboardPage() {
       )}
 
       {events.length > 0 && (
-        <div className="mt-12">
+        <div className="mt-9 sm:mt-12">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Programação</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950">Eventos cadastrados</h2></div>
             <p className="hidden text-sm text-slate-500 sm:block">{events.length} {events.length === 1 ? 'evento encontrado' : 'eventos encontrados'}</p>
@@ -150,7 +150,12 @@ export function OrganizerDashboardPage() {
                 <div className="relative hidden min-h-36 overflow-hidden bg-[#102856] lg:block">
                   {event.posterUrl ? <img src={event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <><span className="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[1.75rem] border-blue-400/20" /><CalendarCheck2 className="absolute bottom-5 left-5 text-blue-300" size={25} /></>}
                 </div>
-                <div className="min-w-0 p-5 sm:p-6">
+                <div className="min-w-0 p-4 sm:p-6">
+                  <div className="flex gap-3">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#102856] lg:hidden">
+                      {event.posterUrl ? <img src={event.posterUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <CalendarCheck2 className="absolute bottom-3 left-3 text-blue-300" size={22} />}
+                    </div>
+                    <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider ${event.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-700' : event.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
                       {eventStatusLabels[event.status]}
@@ -159,32 +164,34 @@ export function OrganizerDashboardPage() {
                       {eventCategoryLabels[event.category]}
                     </span>
                   </div>
-                  <h3 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-slate-950">{event.title}</h3>
-                  <div className="mt-3 flex flex-col gap-1.5 text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5">
+                  <h3 className="mt-2 line-clamp-2 text-lg font-extrabold leading-tight tracking-[-0.025em] text-slate-950 sm:mt-3 sm:text-xl">{event.title}</h3>
+                  <div className="mt-2 flex flex-col gap-1 text-xs text-slate-500 sm:mt-3 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-1.5">
                     <span className="inline-flex items-center gap-1.5"><CalendarDays size={14} className="text-slate-400" />{formatEventDate(event.startDate)}</span>
                     <span className="inline-flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" />{event.city}/{event.state}</span>
+                  </div>
+                    </div>
                   </div>
                   <EventSalesSummary sales={salesByEvent.get(event.id)} />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-5 py-4 lg:max-w-[27rem] lg:justify-end lg:border-l lg:border-t-0 lg:px-6">
+                <div className="grid grid-cols-2 items-center gap-2 border-t border-slate-100 px-4 py-4 sm:flex sm:flex-wrap sm:px-6 lg:max-w-[27rem] lg:justify-end lg:border-l lg:border-t-0">
                   {event.saleMode === 'GENERAL_ADMISSION' && event.status !== 'CANCELLED' && (
-                    <Link className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50" to={`/organizador/eventos/${event.id}/ingressos`}>
+                    <Link className="col-span-2 rounded-lg border border-blue-200 px-3 py-2 text-center text-sm font-semibold text-blue-700 hover:bg-blue-50 sm:col-auto" to={`/organizador/eventos/${event.id}/ingressos`}>
                       Gerenciar ingressos
                     </Link>
                   )}
                   {event.saleMode === 'RESERVED_SEATING' && event.status === 'DRAFT' && (
-                    <Link className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50" to={`/organizador/eventos/${event.id}/assentos`}>
+                    <Link className="col-span-2 rounded-lg border border-blue-200 px-3 py-2 text-center text-sm font-semibold text-blue-700 hover:bg-blue-50 sm:col-auto" to={`/organizador/eventos/${event.id}/assentos`}>
                       Configurar assentos
                     </Link>
                   )}
                   {event.status !== 'CANCELLED' && (
-                    <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" to={`/organizador/eventos/${event.id}/editar`}>
+                    <Link className="rounded-lg border border-slate-200 px-3 py-2 text-center text-sm text-slate-700 hover:bg-slate-50" to={`/organizador/eventos/${event.id}/editar`}>
                       Editar
                     </Link>
                   )}
                   {event.status === 'PUBLISHED' && (
-                    <Link className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" to={`/eventos/${event.slug}`}>
+                    <Link className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" to={`/eventos/${event.slug}`}>
                       Ver no catálogo <ArrowUpRight size={14} />
                     </Link>
                   )}
@@ -214,12 +221,12 @@ export function OrganizerDashboardPage() {
   );
 }
 
-function Metric({ label, value, icon: Icon, accent = false }: { label: string; value: number | string; icon: LucideIcon; accent?: boolean }) {
+function Metric({ label, value, icon: Icon, accent = false, compact = false }: { label: string; value: number | string; icon: LucideIcon; accent?: boolean; compact?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-5 ${accent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-950'}`}>
-      <div className="flex items-start justify-between gap-4">
-        <div><p className={`text-xs font-bold ${accent ? 'text-blue-100' : 'text-slate-500'}`}>{label}</p><p className="mt-2 text-3xl font-extrabold tracking-[-0.05em]">{value}</p></div>
-        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700'}`}><Icon size={19} /></span>
+    <div className={`rounded-2xl border ${compact ? 'p-3.5 sm:p-5' : 'p-5'} ${accent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-950'}`}>
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
+        <div className="min-w-0"><p className={`text-[10px] font-bold leading-tight sm:text-xs ${accent ? 'text-blue-100' : 'text-slate-500'}`}>{label}</p><p className={`mt-1.5 break-words font-extrabold tracking-[-0.05em] sm:mt-2 ${compact ? 'text-xl sm:text-3xl' : 'text-3xl'}`}>{value}</p></div>
+        <span className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex ${accent ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700'}`}><Icon size={19} /></span>
       </div>
     </div>
   );

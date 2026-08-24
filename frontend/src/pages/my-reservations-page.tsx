@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronDown, History } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
@@ -27,6 +28,7 @@ export function MyReservationsPage() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const [now, setNow] = useState(Date.now());
+  const [showHistory, setShowHistory] = useState(false);
   const reservationsQuery = useQuery({
     queryKey: ['reservations'],
     queryFn: () => getMyReservations(token!),
@@ -49,12 +51,34 @@ export function MyReservationsPage() {
   }, []);
 
   const reservations = reservationsQuery.data ?? [];
+  const pendingReservations = reservations.filter(
+    (reservation) =>
+      reservation.status === 'PENDING_PAYMENT' &&
+      new Date(reservation.expiresAt).getTime() > now,
+  );
+  const reservationHistory = reservations.filter(
+    (reservation) => !pendingReservations.includes(reservation),
+  );
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-14">
       <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">Sua agenda</p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950">Minhas reservas</h1>
       <p className="mt-3 text-slate-500">Ingressos pendentes ficam bloqueados por 10 minutos enquanto você conclui o pagamento.</p>
+
+      {reservationHistory.length > 0 && (
+        <button
+          type="button"
+          aria-expanded={showHistory}
+          aria-controls="historico-de-reservas"
+          onClick={() => setShowHistory((current) => !current)}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
+        >
+          <History size={17} />
+          {showHistory ? 'Ocultar histórico' : `Ver histórico (${reservationHistory.length})`}
+          <ChevronDown size={16} className={`transition-transform ${showHistory ? 'rotate-180' : ''}`} />
+        </button>
+      )}
 
       {reservationsQuery.isPending && <LoadingState label="Carregando reservas" variant="list" />}
       {reservationsQuery.isError && <p role="alert" className="mt-8 rounded-xl bg-rose-50 p-4 text-rose-700">Não foi possível carregar suas reservas.</p>}
@@ -67,8 +91,16 @@ export function MyReservationsPage() {
         />
       )}
 
+      {reservationsQuery.isSuccess && reservations.length > 0 && pendingReservations.length === 0 && (
+        <EmptyState
+          title="Nenhuma reserva aguardando pagamento"
+          description="Suas reservas concluídas ou encerradas continuam disponíveis no histórico."
+          action={<Link to="/#eventos" className="font-bold text-blue-700">Explorar eventos</Link>}
+        />
+      )}
+
       <div className="mt-10 space-y-5">
-        {reservations.map((reservation) => (
+        {pendingReservations.map((reservation) => (
           <ReservationCard
             key={reservation.id}
             reservation={reservation}
@@ -78,6 +110,24 @@ export function MyReservationsPage() {
           />
         ))}
       </div>
+
+      {showHistory && reservationHistory.length > 0 && (
+        <div id="historico-de-reservas" className="mt-12 border-t border-slate-200 pt-8">
+          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">Histórico</p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950">Reservas anteriores</h2>
+          <div className="mt-6 space-y-5">
+            {reservationHistory.map((reservation) => (
+              <ReservationCard
+                key={reservation.id}
+                reservation={reservation}
+                now={now}
+                cancelling={cancelMutation.isPending}
+                onCancel={() => cancelMutation.mutate(reservation.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
