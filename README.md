@@ -30,7 +30,7 @@ Este README acompanha a evolução do projeto. Uma funcionalidade só será apre
 - Backend com NestJS e TypeScript estrito.
 - Prisma configurado para PostgreSQL/Supabase.
 - Projeto Supabase provisionado em São Paulo (`sa-east-1`).
-- Data API desativada e RLS automático habilitado para novas tabelas públicas.
+- Data API desativada, RLS com bloqueio explícito e privilégios diretos revogados.
 - Swagger/OpenAPI disponível em `/api/docs`.
 - Health check disponível em `/api/health`.
 - Validação global das requisições no NestJS.
@@ -469,7 +469,7 @@ Credenciais reais devem existir somente nos arquivos `.env`, que não são versi
 
 ## Configuração do Supabase
 
-O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS automático habilitado. As migrations de autenticação, eventos, reservas, pagamentos, segurança, validação, transferência e mapa de assentos, além do seed atual, já foram aplicadas.
+O ambiente atual usa um projeto em **South America (São Paulo)**, com Data API desativada e RLS habilitado. Como toda comunicação passa pela API NestJS, uma migration cria políticas de bloqueio explícito e revoga os privilégios dos papéis `anon`, `authenticated` e `service_role` sobre tabelas, sequências e funções públicas. O Prisma continua acessando o banco exclusivamente pela conexão privada do backend.
 
 Para configurar outro ambiente:
 
