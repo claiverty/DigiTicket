@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowUpRight, CalendarCheck2, CalendarDays, FilePenLine, MapPin, Plus, TicketCheck, Upload } from 'lucide-react';
+import { ArrowUpRight, Banknote, BarChart3, CalendarCheck2, CalendarDays, FilePenLine, MapPin, Plus, ReceiptText, TicketCheck, Upload } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/empty-state';
@@ -12,10 +12,13 @@ import {
   publishEvent,
 } from '../services/event-service';
 import type { Event } from '../types/event';
+import type { OrganizerEventSales } from '../types/organizer-sales';
+import { getOrganizerSales } from '../services/organizer-sales-service';
 import {
   eventCategoryLabels,
   eventStatusLabels,
   formatEventDate,
+  formatMoney,
 } from '../utils/event-formatters';
 
 type EventAction = 'publish' | 'cancel' | 'delete';
@@ -26,6 +29,11 @@ export function OrganizerDashboardPage() {
   const eventsQuery = useQuery({
     queryKey: ['events', 'organizer'],
     queryFn: () => getOrganizerEvents(token!),
+    enabled: Boolean(token),
+  });
+  const salesQuery = useQuery({
+    queryKey: ['organizer', 'sales'],
+    queryFn: () => getOrganizerSales(token!),
     enabled: Boolean(token),
   });
   const actionMutation = useMutation<Event | void, Error, { action: EventAction; id: string }>({
@@ -57,11 +65,15 @@ export function OrganizerDashboardPage() {
   const events = eventsQuery.data ?? [];
   const publishedCount = events.filter((event) => event.status === 'PUBLISHED').length;
   const draftCount = events.filter((event) => event.status === 'DRAFT').length;
+  const salesByEvent = new Map(
+    (salesQuery.data?.eventResults ?? []).map((result) => [result.id, result]),
+  );
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-12">
-      <nav className="mb-6 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5" aria-label="Atalhos do organizador">
+      <nav className="hide-scrollbar mb-6 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5" aria-label="Atalhos do organizador">
         <Link to="/organizador" className="shrink-0 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Visão geral</Link>
+        <Link to="/organizador/vendas" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Vendas</Link>
         <Link to="/organizador/eventos/novo" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Criar evento</Link>
         <Link to="/organizador/importar-eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Importar</Link>
         <Link to="/#eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Ver catálogo</Link>
@@ -87,6 +99,21 @@ export function OrganizerDashboardPage() {
         <Metric label="Publicados" value={publishedCount} icon={TicketCheck} accent />
         <Metric label="Em preparação" value={draftCount} icon={FilePenLine} />
       </div>
+
+      {salesQuery.data && (
+        <div className="mt-8">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Resultados comerciais</p><h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950">Resumo das vendas</h2></div>
+            <Link to="/organizador/vendas" className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700">Ver detalhes <ArrowUpRight size={15} /></Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric label="Reservas" value={salesQuery.data.summary.reservationCount} icon={ReceiptText} />
+            <Metric label="Reservas pagas" value={salesQuery.data.summary.paidReservationCount} icon={BarChart3} />
+            <Metric label="Ingressos vendidos" value={salesQuery.data.summary.ticketsSold} icon={TicketCheck} accent />
+            <Metric label="Receita simulada" value={formatMoney(salesQuery.data.summary.simulatedRevenueCents)} icon={Banknote} />
+          </div>
+        </div>
+      )}
 
       {actionMutation.isError && (
         <p role="alert" className="mt-6 rounded-xl bg-rose-50 p-4 text-rose-700">
@@ -137,6 +164,7 @@ export function OrganizerDashboardPage() {
                     <span className="inline-flex items-center gap-1.5"><CalendarDays size={14} className="text-slate-400" />{formatEventDate(event.startDate)}</span>
                     <span className="inline-flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" />{event.city}/{event.state}</span>
                   </div>
+                  <EventSalesSummary sales={salesByEvent.get(event.id)} />
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-5 py-4 lg:max-w-[27rem] lg:justify-end lg:border-l lg:border-t-0 lg:px-6">
@@ -186,7 +214,7 @@ export function OrganizerDashboardPage() {
   );
 }
 
-function Metric({ label, value, icon: Icon, accent = false }: { label: string; value: number; icon: LucideIcon; accent?: boolean }) {
+function Metric({ label, value, icon: Icon, accent = false }: { label: string; value: number | string; icon: LucideIcon; accent?: boolean }) {
   return (
     <div className={`rounded-2xl border p-5 ${accent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-950'}`}>
       <div className="flex items-start justify-between gap-4">
@@ -195,4 +223,21 @@ function Metric({ label, value, icon: Icon, accent = false }: { label: string; v
       </div>
     </div>
   );
+}
+
+function EventSalesSummary({ sales }: { sales?: OrganizerEventSales }) {
+  if (!sales) return null;
+
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4 sm:grid-cols-4">
+      <EventMetric label="Reservas" value={sales.reservationCount} />
+      <EventMetric label="Pagas" value={sales.paidReservationCount} />
+      <EventMetric label="Vendidos" value={sales.ticketsSold} />
+      <EventMetric label="Receita" value={formatMoney(sales.simulatedRevenueCents)} />
+    </div>
+  );
+}
+
+function EventMetric({ label, value }: { label: string; value: number | string }) {
+  return <div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 text-sm font-extrabold text-slate-800">{value}</p></div>;
 }

@@ -31,6 +31,8 @@ Este README descreve o produto disponível atualmente. O histórico incremental 
 
 O frontend e a API são projetos separados na Vercel, ambos ligados ao mesmo monorepo. A API executa em São Paulo (`gru1`), próxima ao banco Supabase em `sa-east-1`, reduzindo a latência das consultas.
 
+![Página inicial do DigiTicket com evento em destaque](docs/images/digiticket-preview.png)
+
 ## Autenticação
 
 | Método | Endpoint | Acesso | Finalidade |
@@ -78,6 +80,14 @@ Somente eventos com status `PUBLISHED` aparecem no catálogo. Eventos novos semp
 O seed inclui `Festival Luzes da Cidade`, publicado no catálogo, e `Mostra de Cinema Brasileiro`, mantido como rascunho no dashboard do organizador.
 
 O festival possui os tipos de ingresso `Pista` e `Pista Premium`. Um evento de entrada geral precisa ter pelo menos um tipo de ingresso antes de ser publicado. Eventos com assentos reservados precisam ter pelo menos um setor configurado.
+
+## Vendas do organizador
+
+A área `/organizador/vendas` reúne reservas, ingressos emitidos, receita simulada, próximos eventos e as movimentações recentes. O resumo geral é acompanhado por resultados individuais de cada evento, que também aparecem no dashboard principal do organizador. Os valores são calculados no backend exclusivamente a partir dos eventos pertencentes à conta autenticada. Apenas pagamentos aprovados entram na receita simulada.
+
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `GET` | `/api/organizer/sales` | Organizador | Retorna o resumo comercial, os próximos eventos e as reservas recentes da própria conta. |
 
 ## Estoque e reservas
 
@@ -470,7 +480,7 @@ Durante o desenvolvimento do DigiTicket, utilizei o OpenAI Codex para esclarecer
 
 ## Qualidade e tratamento de erros
 
-Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **55 testes unitários em 16 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
+Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência, relatórios do organizador e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **57 testes unitários em 17 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
 
 Erros HTTP usam uma resposta consistente, permitindo que o frontend apresente mensagens úteis sem depender de formatos diferentes entre módulos:
 

@@ -1,5 +1,6 @@
 import {
   ArrowLeftRight,
+  BarChart3,
   CalendarDays,
   ChevronDown,
   CircleHelp,
@@ -178,6 +179,7 @@ function getMenuLinks(role?: string): MenuLink[] {
   if (!role) return [{ label: 'Entrar', to: '/entrar', icon: LogIn }];
   if (role === 'ORGANIZER') return [
     { label: 'Painel do organizador', to: '/organizador', icon: CalendarDays },
+    { label: 'Vendas e reservas', to: '/organizador/vendas', icon: BarChart3 },
     { label: 'Meu perfil', to: '/perfil', icon: UserRound },
   ];
   if (role === 'GATE') return [

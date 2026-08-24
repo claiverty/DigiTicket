@@ -33,6 +33,8 @@ button, a { transition-property: color, background-color, border-color, opacity,
 
 .skip-link:focus { transform: translateY(0); }
 #conteudo-principal { scroll-margin-top: 6rem; }
+.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
 
 @keyframes hero-reveal {
   from { opacity: 0; transform: translateY(8px); }

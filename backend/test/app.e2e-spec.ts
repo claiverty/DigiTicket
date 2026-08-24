@@ -194,6 +194,7 @@ describe('Aplicação (e2e)', () => {
 
   it('expõe o catálogo e protege a gestão de eventos por papel', async () => {
     await request(app.getHttpServer()).get('/api/events').expect(200, []);
+    await request(app.getHttpServer()).get('/api/organizer/sales').expect(401);
 
     const registerResponse = await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -207,6 +208,10 @@ describe('Aplicação (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/api/organizer/events')
+      .set('Authorization', `Bearer ${registration.accessToken}`)
+      .expect(403);
+    await request(app.getHttpServer())
+      .get('/api/organizer/sales')
       .set('Authorization', `Bearer ${registration.accessToken}`)
       .expect(403);
   });

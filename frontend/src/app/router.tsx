@@ -10,6 +10,7 @@ const RegisterPage = lazy(() => import('../pages/register-page').then((module) =
 const ProfilePage = lazy(() => import('../pages/profile-page').then((module) => ({ default: module.ProfilePage })));
 const EventDetailsPage = lazy(() => import('../pages/event-details-page').then((module) => ({ default: module.EventDetailsPage })));
 const OrganizerDashboardPage = lazy(() => import('../pages/organizer-dashboard-page').then((module) => ({ default: module.OrganizerDashboardPage })));
+const OrganizerSalesPage = lazy(() => import('../pages/organizer-sales-page').then((module) => ({ default: module.OrganizerSalesPage })));
 const EventFormPage = lazy(() => import('../pages/event-form-page').then((module) => ({ default: module.EventFormPage })));
 const TicketTypesPage = lazy(() => import('../pages/ticket-types-page').then((module) => ({ default: module.TicketTypesPage })));
 const MyReservationsPage = lazy(() => import('../pages/my-reservations-page').then((module) => ({ default: module.MyReservationsPage })));
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
             element: <RoleRoute allowedRoles={['ORGANIZER']} />,
             children: [
               { path: 'organizador', element: loadPage(<OrganizerDashboardPage />) },
+              { path: 'organizador/vendas', element: loadPage(<OrganizerSalesPage />) },
               {
                 path: 'organizador/importar-eventos',
                 element: loadPage(<ExternalEventsPage />),
