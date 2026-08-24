@@ -464,6 +464,10 @@ As configurações específicas da Vercel estão versionadas em `frontend/vercel
 
 O seed cria contas e dados de demonstração. Ele é adequado para avaliação do projeto, mas não deve ser executado em um ambiente destinado a usuários reais.
 
+## Uso de inteligência artificial
+
+Durante o desenvolvimento do DigiTicket, utilizei o OpenAI Codex para esclarecer dúvidas, avaliar soluções, revisar a estrutura do projeto, realizar testes, identificar erros e analisar possíveis melhorias. As sugestões foram avaliadas e adaptadas às necessidades do projeto antes de serem implementadas e testadas.
+
 ## Qualidade e tratamento de erros
 
 Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **55 testes unitários em 16 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
