@@ -71,14 +71,6 @@ export function OrganizerDashboardPage() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-12">
-      <nav className="hide-scrollbar mb-4 flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 sm:mb-6" aria-label="Atalhos do organizador">
-        <Link to="/organizador" className="shrink-0 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Visão geral</Link>
-        <Link to="/organizador/vendas" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Vendas</Link>
-        <Link to="/organizador/eventos/novo" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Criar evento</Link>
-        <Link to="/organizador/importar-eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Importar</Link>
-        <Link to="/#eventos" className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Ver catálogo</Link>
-      </nav>
-
       <div className="relative overflow-hidden rounded-3xl bg-[#071a3d] px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <span className="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[3.5rem] border-blue-500/15" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-7">
