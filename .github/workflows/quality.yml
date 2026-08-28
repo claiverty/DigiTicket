@@ -39,6 +39,9 @@ jobs:
       - name: Validar a tipagem
         run: npm run lint
 
+      - name: Executar os testes
+        run: npm run test
+
       - name: Gerar o build
         run: npm run build
 

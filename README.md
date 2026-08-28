@@ -494,7 +494,7 @@ Durante o desenvolvimento do DigiTicket, utilizei o OpenAI Codex para esclarecer
 
 ## Qualidade e tratamento de erros
 
-Os testes automatizados cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência, relatórios do organizador e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **58 testes unitários em 17 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
+Os testes automatizados do frontend cobrem a proteção por autenticação e papel, os limites de quantidade, o cálculo do valor da seleção e a criação de reservas. No backend, eles cobrem autenticação e papéis, estoque concorrente, reserva e expiração, pagamento, emissão de ingressos com assento, compartilhamento, transferência, relatórios do organizador e validação na portaria. Os testes E2E verificam as rotas públicas, a proteção por JWT e papel e o formato das falhas de validação e autenticação. Na revisão final, passaram **8 testes de frontend**, **58 testes unitários de backend em 17 suítes** e **7 testes E2E**, além do lint, da validação do Prisma e dos builds de frontend e backend.
 
 O workflow `.github/workflows/quality.yml` repete essas verificações automaticamente em pushes e pull requests. Frontend e backend são validados em jobs paralelos, com instalação reproduzível por `npm ci` e sem acesso a credenciais ou bancos reais.
 
@@ -519,6 +519,7 @@ Frontend:
 ```powershell
 cd frontend
 npm run lint
+npm run test
 npm run build
 ```
 
