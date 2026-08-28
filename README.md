@@ -458,7 +458,15 @@ npm run prisma:migrate:deploy
 npm run seed
 ```
 
+7. No SQL Editor do Supabase, execute o arquivo `backend/prisma/supabase/enable-reservation-expiration-cron.sql` uma vez para ativar o job de expiração do ambiente.
+
 O frontend continuará sem acessar o Supabase diretamente. Toda comunicação permanece no fluxo `Frontend → NestJS → Prisma → PostgreSQL`.
+
+### Expiração automática das reservas
+
+A migration cria a função privada `expire_pending_reservations`, que seleciona reservas vencidas com bloqueio `FOR UPDATE SKIP LOCKED`, altera o estado e libera estoque e assentos na mesma transação. O Supabase Cron executa a função a cada minuto em lotes de até 500 reservas, independentemente do tráfego da aplicação.
+
+As verificações lazy da API continuam ativas como defesa adicional. A transição condicional garante que pagamento, cancelamento, requisição da API e job periódico não devolvam o mesmo estoque duas vezes.
 
 ## Deploy
 
@@ -537,7 +545,7 @@ Melhorias que podem ampliar o projeto sem fazer parte do escopo obrigatório do 
 - Pagamentos são intencionalmente simulados e não realizam cobrança financeira, conforme o objetivo de demonstração do projeto.
 - A transferência é gratuita e não inclui anúncio, preço ou revenda entre usuários.
 - O mapa atual usa um grid simples; ele não representa plantas irregulares, mesas ou corredores personalizados.
-- A expiração usa verificações lazy; um job periódico poderá ser adicionado como complemento em produção.
+- O job de expiração precisa ser habilitado uma vez em cada novo projeto Supabase com o script operacional versionado.
 - O ambiente usa somente a API NestJS para acessar o banco; acesso direto pelo frontend e Data API não fazem parte da arquitetura atual.
 - A pesquisa externa depende da disponibilidade, dos dados e dos limites de uso da Ticketmaster Discovery API.
 - O enriquecimento editorial é uma leitura de melhor esforço da página pública da Ticketmaster Brasil e usa o texto factual automático caso a estrutura do site mude.

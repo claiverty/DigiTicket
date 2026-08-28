@@ -141,4 +141,15 @@ describe('ReservationsService', () => {
       data: { availableQuantity: { increment: 3 } },
     });
   });
+
+  it('não devolve o estoque quando outra operação já alterou a reserva', async () => {
+    const { service, prisma, transaction } = createContext();
+    prisma.reservation.findMany.mockResolvedValue([{ id: 'expired-id' }]);
+    transaction.reservation.updateMany.mockResolvedValue({ count: 0 });
+
+    await expect(service.expirePendingReservations()).resolves.toBe(0);
+    expect(transaction.reservationItem.findMany).not.toHaveBeenCalled();
+    expect(transaction.ticketType.update).not.toHaveBeenCalled();
+    expect(transaction.eventSeat.updateMany).not.toHaveBeenCalled();
+  });
 });
