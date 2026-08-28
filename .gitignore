@@ -24,3 +24,6 @@ backend/coverage/
 # Artefatos locais do Prisma
 backend/prisma/*.db
 backend/prisma/*.db-journal
+
+# Material pessoal de preparação, fora do escopo do produto
+/preparacao-entrevista-verzel.txt

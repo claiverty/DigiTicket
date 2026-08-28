@@ -20,7 +20,7 @@ Portaria valida a entrada
 
 Este README descreve o produto disponível atualmente. O histórico incremental de desenvolvimento permanece documentado nos commits do repositório.
 
-## Produção
+## Ambiente público de demonstração
 
 | Serviço | Endereço |
 | --- | --- |
@@ -30,6 +30,8 @@ Este README descreve o produto disponível atualmente. O histórico incremental 
 | Verificação de saúde | [https://digiticket-api.vercel.app/api/health](https://digiticket-api.vercel.app/api/health) |
 
 O frontend e a API são projetos separados na Vercel, ambos ligados ao mesmo monorepo. A API executa em São Paulo (`gru1`), próxima ao banco Supabase em `sa-east-1`, reduzindo a latência das consultas.
+
+Este ambiente existe exclusivamente para avaliação do projeto. Ele utiliza somente dados fictícios, pode ser reiniciado sem aviso e não deve receber informações pessoais ou financeiras reais. As contas abaixo possuem permissões de demonstração e não representam credenciais de um ambiente de produção.
 
 ![Página inicial do DigiTicket com evento em destaque](docs/images/digiticket-preview.png)
 
@@ -41,7 +43,7 @@ O frontend e a API são projetos separados na Vercel, ambos ligados ao mesmo mon
 | `POST` | `/api/auth/login` | Público | Valida as credenciais e emite um JWT. |
 | `GET` | `/api/auth/me` | Bearer JWT | Retorna o usuário autenticado. |
 
-Estas contas estão disponíveis no ambiente configurado:
+Estas contas estão disponíveis somente no ambiente público de demonstração:
 
 | Papel | E-mail | Senha |
 | --- | --- | --- |
@@ -401,6 +403,7 @@ npm install
 Copy-Item .env.example .env
 npm run prisma:generate
 npm run prisma:migrate:deploy
+# Altere DEMO_SEED_ENABLED para true no .env local antes do próximo comando.
 npm run seed
 npm run start:dev
 ```
@@ -426,6 +429,7 @@ JWT_SECRET=
 JWT_EXPIRES_IN=7d
 TICKET_SIGNING_SECRET=
 TICKETMASTER_API_KEY=
+DEMO_SEED_ENABLED=false
 ```
 
 Credenciais reais devem existir somente nos arquivos `.env`, que não são versionados.
@@ -446,7 +450,7 @@ Para configurar outro ambiente:
    - backend serverless: **Transaction pooler**, porta `6543`.
 4. Configure `DIRECT_URL` com a conexão direta, porta `5432`, para migrations. Caso sua rede não ofereça IPv6, utilize o Session pooler como alternativa.
 5. Codifique caracteres especiais da senha na URL, por exemplo `@` como `%40`.
-6. Aplique a migration versionada e execute o seed:
+6. Aplique a migration versionada. Execute o seed somente em um banco local ou de demonstração, depois de configurar `DEMO_SEED_ENABLED=true`:
 
 ```powershell
 cd backend
@@ -470,9 +474,11 @@ O deploy atual preserva dois serviços separados: frontend estático e API NestJ
 8. configure o monitoramento do endpoint `/api/health`;
 9. mantenha HTTPS, necessário também para o acesso à câmera fora de `localhost`.
 
+Uma instalação destinada a usuários reais deve utilizar banco, segredos e contas diferentes do ambiente de demonstração. Nesse caso, mantenha `DEMO_SEED_ENABLED=false` ou omita a variável. Para uma instalação isolada de avaliação, defina a variável como `true` somente durante a execução intencional do seed e rotacione as credenciais antes de reutilizar o ambiente para outra finalidade.
+
 As configurações específicas da Vercel estão versionadas em `frontend/vercel.json`, responsável pelo fallback das rotas da SPA, e `backend/vercel.json`, que posiciona a API na região `gru1`.
 
-O seed cria contas e dados de demonstração. Ele é adequado para avaliação do projeto, mas não deve ser executado em um ambiente destinado a usuários reais.
+O seed cria contas privilegiadas e dados fictícios. Por segurança, sua execução é bloqueada por padrão e depende de `DEMO_SEED_ENABLED=true`.
 
 ## Uso de inteligência artificial
 

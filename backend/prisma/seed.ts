@@ -35,6 +35,12 @@ const demoUsers = [
 ] as const;
 
 async function main() {
+  if (process.env.DEMO_SEED_ENABLED !== 'true') {
+    throw new Error(
+      'Seed de demonstração bloqueado. Configure DEMO_SEED_ENABLED=true somente em um ambiente isolado de avaliação.',
+    );
+  }
+
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
 
   for (const user of demoUsers) {
